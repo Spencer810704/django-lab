@@ -20,7 +20,7 @@ pipeline {
     DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')
     
     // 不論是自建或是官方 
-    DOCKER_REGISTRY_ACCOUNT = "$DOCKER_HUB_CREDENTIALS_USR"
+    DOCKER_REGISTRY_ACCOUNT = "$DOCKER_REGISTRY_CREDENTIALS_USR"
     DOCKER_REGISTRY_REPOSITOY_NAME = "mylab"
 
   }
