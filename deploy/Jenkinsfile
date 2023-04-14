@@ -43,7 +43,7 @@ pipeline {
     }
     stage('Build Image') {
       steps {
-        sh 'docker build -t $DOCKER_HUB_ACCOUNT/$DOKCER_HUB_REPOSITOY:$IMAGE_TAG ./'
+        sh 'docker build -t ${DOCKER_HUB_ACCOUNT}/${DOKCER_HUB_REPOSITOY}:$IMAGE_TAG ./'
       }
     }
     stage('Docker Login') {
