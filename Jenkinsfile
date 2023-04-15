@@ -42,19 +42,20 @@ pipeline {
     }
     stage('Build Image') {
       steps {
-        sh 'docker build -t $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
+        // sh 'docker build -t $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
+        sh 'make build'
       }
     }
-    stage('Docker Login') {
-      steps {
-        sh 'echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login $DOCKER_REGISTRY_URL -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin'
-      }
-    }
-    stage('Docker Push') {
-      steps {
-        sh 'docker push $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG'
-      }
-    }
+    // stage('Docker Login') {
+    //   steps {
+    //     sh 'echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login $DOCKER_REGISTRY_URL -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin'
+    //   }
+    // }
+    // stage('Docker Push') {
+    //   steps {
+    //     sh 'docker push $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG'
+    //   }
+    // }
   }
   post {
     always {
