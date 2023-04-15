@@ -16,7 +16,7 @@ pipeline {
     // DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
         
     // 自建Docker Image倉庫
-    DOCKER_REGISTRY_URL = "https://myregistrydomain.com:5000"
+    DOCKER_REGISTRY_URL = "https://myregistrydomain.com"
     DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')
     
     // 不論是自建或是官方 
