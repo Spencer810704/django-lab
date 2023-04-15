@@ -43,14 +43,15 @@ pipeline {
     stage('Build Image') {
       steps {
         // sh 'docker build -t $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
-        sh 'make build DOCKER_REGISTRY_ACCOUNT=$DOCKER_REGISTRY_CREDENTIALS_USR'
+        sh 'make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR'
       }
     }
-    // stage('Docker Login') {
-    //   steps {
-    //     sh 'echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login $DOCKER_REGISTRY_URL -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin'
-    //   }
-    // }
+    stage('Docker Login') {
+      steps {
+        // sh 'echo $DOCKER_REGISTRY_CREDENTIALS_PSW | docker login $DOCKER_REGISTRY_URL -u $DOCKER_REGISTRY_CREDENTIALS_USR --password-stdin'
+        sh 'make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW'
+      }
+    }
     // stage('Docker Push') {
     //   steps {
     //     sh 'docker push $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG'
