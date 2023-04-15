@@ -43,7 +43,7 @@ pipeline {
     stage('Build Image') {
       steps {
         // sh 'docker build -t $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
-        sh 'make build'
+        sh 'make build DOCKER_REGISTRY_ACCOUNT=DOCKER_REGISTRY_CREDENTIALS_USR'
       }
     }
     // stage('Docker Login') {
