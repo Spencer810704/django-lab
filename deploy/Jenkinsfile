@@ -4,25 +4,24 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
   parameters {
+    string(name: 'IMAGE_NAME', defaultValue: 'mylab', description: 'Image Name')
     string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Image TAG')
 
   }
   environment {
     
     // ================== Docker Registry Information ==================
-
-    // Docker HUB 官方倉庫
-    // DOCKER_REGISTRY_URL = "https://registry-1.docker.io"
-    // DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
-        
-    // 自建Docker Image倉庫
-    DOCKER_REGISTRY_URL = "https://myregistrydomain.com"
-    DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')
     
-    // 不論是自建或是官方 
-    DOCKER_REGISTRY_ACCOUNT = "$DOCKER_REGISTRY_CREDENTIALS_USR"
-    DOCKER_REGISTRY_REPOSITOY_NAME = "mylab"
+    // Docker HUB 官方倉庫
+    DOCKER_REGISTRY_URL = "https://registry-1.docker.io"
+    DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
 
+    // 自建Docker Image倉庫 
+    // DOCKER_REGISTRY_URL = "https://myregistrydomain.com"
+    // DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
+    
+    DOCKER_REGISTRY_ACCOUNT = "$DOCKER_REGISTRY_CREDENTIALS_USR"
+    DOCKER_REGISTRY_REPOSITOY_NAME = "$DOCKER_REGISTRY_ACCOUNT/$IMAGE_NAME"
   }
   stages {
     stage("Checkout Application Git Repository") {
@@ -43,7 +42,7 @@ pipeline {
     }
     stage('Build Image') {
       steps {
-        sh 'docker build -t $DOCKER_REGISTRY_ACCOUNT/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
+        sh 'docker build -t $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG ./'
       }
     }
     stage('Docker Login') {
@@ -53,7 +52,7 @@ pipeline {
     }
     stage('Docker Push') {
       steps {
-        sh 'docker push $DOCKER_REGISTRY_ACCOUNT/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG'
+        sh 'docker push $DOCKER_REGISTRY_URL/$DOCKER_REGISTRY_REPOSITOY_NAME:$IMAGE_TAG'
       }
     }
   }
