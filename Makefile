@@ -4,6 +4,7 @@ DOCKERFILE=Dockerfile
 # Image設置
 IMAGE_NAME=lab
 IMAGE_IMAGE_TAG=latest
+
 # Docker Registry Information
 DOCKER_REGISTRY_URL=myregistrydomain.com
 DOCKER_REGISTRY_REPOSITOY_NAME=$(DOCKER_REGISTRY_USERNAME)/$(IMAGE_NAME)
