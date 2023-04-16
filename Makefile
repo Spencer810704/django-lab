@@ -12,7 +12,7 @@ TARGET_IMAGE_NAME=$(DOCKER_REGISTRY_URL)/$(DOCKER_REGISTRY_USERNAME)/$(IMAGE_NAM
 
 # Build image (直接在Build的時候打Tag)
 build:
-	docker build -t $(TARGET_IMAGE_NAME) -f $(DOCKERFILE) .
+	docker build --no-cache -t $(TARGET_IMAGE_NAME) -f $(DOCKERFILE) .
 
 # 登入 & Push Image
 push:
