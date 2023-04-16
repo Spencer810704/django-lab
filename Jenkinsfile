@@ -11,12 +11,10 @@ pipeline {
     // ================== Docker Registry Information ==================
     
     // Docker HUB 官方倉庫
-    // DOCKER_REGISTRY_URL = "registry-1.docker.io"
-    // DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
+    DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
 
     // 自建 Docker Registry 
-    DOCKER_REGISTRY_URL = "myregistrydomain.com"
-    DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
+    // DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
     
   }
   stages {
