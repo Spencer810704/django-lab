@@ -20,8 +20,6 @@ pipeline {
     DOCKER_REGISTRY_URL = "myregistrydomain.com"
     DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
     
-    DOCKER_REGISTRY_ACCOUNT = "$DOCKER_REGISTRY_CREDENTIALS_USR"
-    DOCKER_REGISTRY_REPOSITOY_NAME = "$DOCKER_REGISTRY_ACCOUNT/$IMAGE_NAME"
   }
   stages {
     stage("Checkout Application Git Repository") {
