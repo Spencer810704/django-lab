@@ -23,4 +23,4 @@ push:
 	docker push $(TARGET_IMAGE_NAME) 
 
 deploy:
-   kubectl --kubeconfig=$(KUBECONFIG) apply -f deployment.yaml --image $(IAMGE_TAG)
+   kubectl --kubeconfig=$(KUBECONFIG) apply -f deployment.yaml --image $(TARGET_IMAGE_NAME)
