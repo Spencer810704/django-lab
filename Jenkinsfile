@@ -46,6 +46,13 @@ pipeline {
         sh 'make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG'
       }
     }
+    stage('Deploy to kubernetes') {
+      steps {
+        withCredentials([file(credentialsId: 'jenkins-kubeconfig	', variable: 'KUBECONFIG')]) {
+          sh 'make deploy KUBECONFIG=${KUBECONFIG} IMAGE_TAG=$IAMGE_TAG'
+        }
+      }
+    }
   }
   post {
     always {

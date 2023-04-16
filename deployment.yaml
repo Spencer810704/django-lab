@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  django-lab
+  namespace: devops
+  labels:
+    app:  django-lab
+spec:
+  selector:
+    matchLabels:
+      app: django-lab
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app:  django-lab
+    spec:
+      containers:
+      - name:  django-lab
+        image:  django-lab:latest
+        envFrom:
+        - configMapRef:
+          name: django-lab-configmaps
+        - secretRef:
+          name: django-lab-secrets
+        ports:
+        - containerPort:  80
+          name:  django-lab
+      restartPolicy: Always
