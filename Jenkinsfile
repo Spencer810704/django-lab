@@ -4,9 +4,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
   parameters {
-    string(name: 'IMAGE_NAME', defaultValue: 'mylab', description: 'Image Name')
     string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Image TAG')
-
   }
   environment {
     

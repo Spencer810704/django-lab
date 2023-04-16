@@ -3,6 +3,8 @@ DOCKERFILE=Dockerfile
 
 # Docker Registry 資訊
 DOCKER_REGISTRY_URL=myregistrydomain.com
+
+# 根據專案名稱做修改
 IMAGE_NAME=django-lab
 
 # 目標Imag名稱 (格式：docker_registry_url/account_name/your_image_name:your_image_tag)
