@@ -20,9 +20,9 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         envFrom:
         - configMapRef:
-          name: "{{ .Release.Name }}-configmap"
+            name: "{{ .Release.Name }}-configmap"
         - secretRef:
-          name: django-lab-secrets
+            name: "{{ .Release.Name }}-secrets"
         ports:
         - containerPort:  80
           name:  django-lab
