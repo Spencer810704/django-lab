@@ -48,8 +48,8 @@ pipeline {
       steps {
         withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
           // sh 'make deploy KUBECONFIG=${KUBECONFIG} IMAGE_TAG=$IMAGE_TAG'
-          sh 'helm install --namespace devops django-lab django-lab-chart'
-          // sh 'helm install django-lab django-lab-chart --kubeconfig $KUBECONFIG'
+          // sh 'helm install --namespace devops django-lab django-lab-chart'
+          sh 'helm upgrade --install --namespace devops django-lab django-lab-chart'
         }
       }
     }
