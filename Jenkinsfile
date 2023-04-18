@@ -4,6 +4,7 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
   parameters {
+    string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
     string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Image TAG')
   }
   environment {
@@ -39,24 +40,24 @@ pipeline {
     //     sh 'make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG'
     //   }
     // }
+
     // stage('Docker Login') {
     //   steps {
     //     sh 'make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG'
     //   }
     // }
+
     stage('Deploy to kubernetes') {
       steps {
         withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
-          // sh 'make deploy KUBECONFIG=${KUBECONFIG} IMAGE_TAG=$IMAGE_TAG'
-          // sh 'helm install --namespace devops django-lab django-lab-chart'
-          sh 'helm upgrade --install --namespace devops django-lab django-lab-chart'
+          sh 'helm upgrade --install $IMAGE_NAME django-lab-chart --namespace devops --set image.tag=$IMAGE_TAG'
         }
       }
     }
   }
-  // post {
-  //   always {
-  //     sh 'docker logout $DOCKER_REGISTRY_URL'
-  //   }
-  // }
+  post {
+    always {
+      sh 'docker logout $DOCKER_REGISTRY_URL'
+    }
+  }
 }
