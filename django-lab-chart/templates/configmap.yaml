@@ -4,7 +4,7 @@ metadata:
   name: "{{ .Release.Name }}-configmap"
   namespace: devops
 data:
-  DJANGO_DEBUG_MODE: True
+  DJANGO_DEBUG_MODE: "True"
   DJANGO_ALLOWED_HOSTS: "*"
   DATABASE_ENGINE: "postgresql_psycopg2"
   DJANGO_LOGLEVEL: "info"
