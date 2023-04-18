@@ -5,7 +5,6 @@ pipeline {
   }
   parameters {
     string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
-    // string(name: 'IMAGE_TAG',  defaultValue: 'latest',     description: 'Image TAG')
   }
   environment {
     
@@ -39,14 +38,14 @@ pipeline {
     // 建立Docker Image
     stage('Build Image') {
       steps {
-        // sh 'make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG'
+        // 設定IMAGE_TAG為git commit 前六碼
         sh 'make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$(git rev-parse --short HEAD)'
       }
     }
     // 登入Docker Registry
     stage('Docker Login') {
       steps {
-        // sh 'make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG'
+        // 設定IMAGE_TAG為git commit 前六碼
         sh 'make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$(git rev-parse --short HEAD)'
       }
     }
@@ -54,7 +53,7 @@ pipeline {
     stage('Deploy to kubernetes') {
       steps {
         withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
-          // sh 'helm upgrade --install $IMAGE_NAME django-lab-chart --namespace devops --set image.tag=$IMAGE_TAG'
+          // 設定IMAGE_TAG為git commit 前六碼
           sh 'helm upgrade --install $IMAGE_NAME django-lab-chart --namespace devops --set image.tag=$(git rev-parse --short HEAD)'
         }
       }
