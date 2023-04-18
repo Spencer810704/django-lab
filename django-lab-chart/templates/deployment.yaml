@@ -21,8 +21,8 @@ spec:
         envFrom:
         - configMapRef:
             name: "{{ .Release.Name }}-configmap"
-        # - secretRef:
-        #     name: "django-lab-secrets"
+        - secretRef:
+            name: "django-lab-secrets"
         ports:
         - containerPort:  80
           name:  django-lab
