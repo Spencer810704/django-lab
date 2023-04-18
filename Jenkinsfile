@@ -3,19 +3,21 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
-  parameters {
-    string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
-  }
+  // parameters {
+  //   string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
+  // }
   environment {
     
     // ================== Docker Registry Information ==================
-    
     // Docker HUB 官方倉庫
     DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
 
     // 自建 Docker Registry 
     // DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
-    
+
+    // 專案名稱
+    IMAGE_NAME = 'django-lab'
+
   }
   stages {
     // Clone Git repo
