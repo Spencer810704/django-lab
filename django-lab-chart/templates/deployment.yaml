@@ -17,10 +17,10 @@ spec:
     spec:
       containers:
       - name:  django-lab
-        image:  django-lab:latest
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         envFrom:
         - configMapRef:
-          name: django-lab-configmaps
+          name: "{{ .Release.Name }}-configmap"
         - secretRef:
           name: django-lab-secrets
         ports:
