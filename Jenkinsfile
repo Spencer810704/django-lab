@@ -46,7 +46,7 @@ pipeline {
     // }
     stage('Deploy to kubernetes') {
       steps {
-        withCredentials([file(credentialsId: 'jenkins-kubeconfig	', variable: 'KUBECONFIG')]) {
+        withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
           // sh 'make deploy KUBECONFIG=${KUBECONFIG} IMAGE_TAG=$IMAGE_TAG'
           sh 'helm install django-lab django-lab-chart --kubeconfig $KUBECONFIG'
         }
