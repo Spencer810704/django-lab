@@ -5,7 +5,7 @@ pipeline {
   }
   parameters {
     string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
-    string(name: 'IMAGE_TAG',  defaultValue: 'latest',     description: 'Image TAG')
+    // string(name: 'IMAGE_TAG',  defaultValue: 'latest',     description: 'Image TAG')
   }
   environment {
     
