@@ -50,8 +50,8 @@ pipeline {
           def FOO = env.FOO
           def BAR = env.BAR
           String output = """\
-            FOO: ${FOO=undefined}
-            BAR: ${BAR=undefined}
+            FOO: ${FOO ?: 'undefined'}
+            BAR: ${BAR ?: 'undefined'}
           """
           echo output
 
