@@ -47,38 +47,17 @@ pipeline {
       
       steps {
         script {
-          def FOO = env.FOO
-          def BAR = env.BAR
           String output = """\
             ================ 以下為 Jenkinsfile 中定義的環境變數 ================ 
-            DOCKER_REGISTRY_URL: ${DOCKER_REGISTRY_URL ?: 'undefined'}
-            DOCKER_REGISTRY_REPOSITORY: ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
-            IMAGE_TAG: ${IMAGE_TAG ?: 'undefined'}
-            KUBERNETES_NAMESPACE: ${KUBERNETES_NAMESPACE ?: 'undefined'}
-            HELM_RELEASE_NAME: ${HELM_RELEASE_NAME ?: 'undefined'}
-            HELM_CHART_NAME: ${HELM_CHART_NAME ?: 'undefined'}
+            DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL ?: 'undefined'}
+            DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
+            IMAGE_TAG                   : ${IMAGE_TAG ?: 'undefined'}
+            KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE ?: 'undefined'}
+            HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME ?: 'undefined'}
+            HELM_CHART_NAME             : ${HELM_CHART_NAME ?: 'undefined'}
             ================================================================== 
-
           """.stripIndent()
           echo output
-
-          // String output = """\
-          //   DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL
-          //   DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
-          //   IMAGE_TAG: $IMAGE_TAG
-          //   KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE
-          //   HELM_RELEASE_NAME: $HELM_RELEASE_NAME
-          //   HELM_CHART_NAME: $HELM_CHART_NAME
-          // """
-          // echo output
-          // def output = ""
-          // output += "DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL\n"
-          // output += "DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY\n"
-          // output += "IMAGE_TAG: $IMAGE_TAG\n"
-          // output += "KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE\n"
-          // output += "HELM_RELEASE_NAME: $HELM_RELEASE_NAME\n"
-          // output += "HELM_CHART_NAME: $HELM_CHART_NAME\n"
-          // echo output
         }
       }
     }
