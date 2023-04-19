@@ -50,14 +50,16 @@ pipeline {
           def FOO = env.FOO
           def BAR = env.BAR
           String output = """\
-            FOO: ${FOO ?: 'undefined'}
-            BAR: ${BAR ?: 'undefined'}
+            DOCKER_REGISTRY_URL: ${DOCKER_REGISTRY_URL ?: 'undefined'}
+            DOCKER_REGISTRY_REPOSITORY: ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
+            IMAGE_TAG: ${IMAGE_TAG ?: 'undefined'}
+            KUBERNETES_NAMESPACE: ${KUBERNETES_NAMESPACE ?: 'undefined'}
+            HELM_RELEASE_NAME: ${HELM_RELEASE_NAME ?: 'undefined'}
+            HELM_CHART_NAME: ${HELM_CHART_NAME ?: 'undefined'}
           """.stripIndent()
           echo output
 
           // String output = """\
-          //   FOO: ${FOO=undefined}
-          //   BAR: ${BAR=undefined}
           //   DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL
           //   DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
           //   IMAGE_TAG: $IMAGE_TAG
