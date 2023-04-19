@@ -43,6 +43,15 @@ pipeline {
         ])
       }
     }
+    stage('Print environment') {
+      steps {
+        script {
+          writeFile file: 'env.json', text: sh(script: 'env', returnStdout: true)
+          def env = readJSON file: 'env.json'
+          echo env
+        }
+      }
+    }
     stage("Show Jenkins Environment") {
       
       steps {
