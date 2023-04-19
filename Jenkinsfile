@@ -3,21 +3,23 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: '5'))
   }
-  // parameters {
-  //   string(name: 'IMAGE_NAME', defaultValue: 'django-lab', description: 'Image Repository')
-  // }
   environment {
-    
     // ================== Docker Registry Information ==================
     // Docker HUB 官方倉庫
     DOCKER_REGISTRY_CREDENTIALS = credentials('docker-hub')
+    DOCKER_IMAGE_REPOSITORY = 'spencer810704/django-lab'
 
     // 自建 Docker Registry 
     // DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
+    // DOCKER_IMAGE_REPOSITORY = 'spencer810704/django-lab'
 
-    // 專案名稱
-    IMAGE_NAME = 'django-lab'
 
+    // Kubernetes Namespace
+    KUBERNETES_NAMESPACE = 'devops'
+
+    // Helm Chart Information
+    HELM_RELEASE_NAME    = 'django-lab'
+    HELM_CHART_NAME      = 'django-lab-chart'
   }
   stages {
     // Clone Git repo
@@ -37,7 +39,7 @@ pipeline {
         ])
       }
     }
-    // 建立Docker Image
+    // 建立Docker Image(設定 --no-cache 不使用 image cache)
     stage('Build Image') {
       steps {
         // 設定IMAGE_TAG為git commit 前六碼
@@ -56,11 +58,10 @@ pipeline {
       steps {
         withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
           // 設定IMAGE_TAG為git commit 前六碼
-          sh 'helm upgrade --install $IMAGE_NAME django-lab-chart --namespace devops --set image.tag=$(git rev-parse --short HEAD)'
+          sh 'helm upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_IMAGE_REPOSITORY --set image.tag=$(git rev-parse --short HEAD)'
         }
       }
     }
-
   }
   post {
     always {
