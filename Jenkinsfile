@@ -43,30 +43,29 @@ pipeline {
         ])
       }
     }
-    stage('Print environment') {
-      steps {
-        script {
-          // 需要安裝 Pipeline Utility Steps套件
-          withEnv(['LC_CTYPE=en_US.UTF-8', 'LANG=en_US.UTF-8']) {
-            def envJson = sh(script: 'env | jq -R "split(\"\n\") | map(split(\"=\")) | map({key: .[0], value: .[1]}) | from_entries"', returnStdout: true)
-            def env = readJSON text: envJson
-            echo env
-          }
-        }
-      }
-    }
     stage("Show Jenkins Environment") {
       
       steps {
         script {
-          def output = ""
-          output += "DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL\n"
-          output += "DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY\n"
-          output += "IMAGE_TAG: $IMAGE_TAG\n"
-          output += "KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE\n"
-          output += "HELM_RELEASE_NAME: $HELM_RELEASE_NAME\n"
-          output += "HELM_CHART_NAME: $HELM_CHART_NAME\n"
+          String output = """\
+            FOO: ${FOO=undefined}
+            BAR: ${BAR=undefined}
+            DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL
+            DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
+            IMAGE_TAG: $IMAGE_TAG
+            KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE
+            HELM_RELEASE_NAME: $HELM_RELEASE_NAME
+            HELM_CHART_NAME: $HELM_CHART_NAME
+          """
           echo output
+          // def output = ""
+          // output += "DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL\n"
+          // output += "DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY\n"
+          // output += "IMAGE_TAG: $IMAGE_TAG\n"
+          // output += "KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE\n"
+          // output += "HELM_RELEASE_NAME: $HELM_RELEASE_NAME\n"
+          // output += "HELM_CHART_NAME: $HELM_CHART_NAME\n"
+          // echo output
         }
       }
     }
