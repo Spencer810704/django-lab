@@ -13,7 +13,6 @@ pipeline {
     // DOCKER_REGISTRY_CREDENTIALS = credentials('self-docker-registry')    
     // DOCKER_IMAGE_REPOSITORY = 'spencer810704/django-lab'
 
-
     // Kubernetes Namespace
     KUBERNETES_NAMESPACE = 'devops'
 
