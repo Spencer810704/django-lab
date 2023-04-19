@@ -52,7 +52,7 @@ pipeline {
           String output = """\
             FOO: ${FOO ?: 'undefined'}
             BAR: ${BAR ?: 'undefined'}
-          """
+          """.stripIndent()
           echo output
 
           // String output = """\
