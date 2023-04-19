@@ -46,8 +46,9 @@ pipeline {
     stage('Print environment') {
       steps {
         script {
-          writeFile file: 'env.json', text: sh(script: 'env', returnStdout: true)
-          def env = readJSON file: 'env.json'
+          // 需要安裝 Pipeline Utility Steps套件、
+          def envJson = sh(script: 'env | jq -R "split(\"\n\") | map(split(\"=\")) | map({key: .[0], value: .[1]}) | from_entries"', returnStdout: true)
+          def env = readJSON text: envJson
           echo env
         }
       }
