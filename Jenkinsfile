@@ -4,26 +4,32 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: "5"))
   }
   environment {
-    // ================== Docker Registry Information ==================
-    // Docker HUB 官方倉庫
-    DOCKER_REGISTRY_URL         = "registry-1.docker.io"
-    DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")
-    DOCKER_REGISTRY_REPOSITORY = "$DOCKER_REGISTRY_CREDENTIALS_USR/django-lab"
+    // ====================== Project Information ======================
+    // 專案名稱
+    PROJECT_NAME = "django-lab"
 
     // 取得 Git Commit Hash 作為Image Tag
     IMAGE_TAG = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
 
+    // ================== Docker Registry Information ==================
+    
+    // For Docker HUB
+    DOCKER_REGISTRY_URL         = "registry-1.docker.io"
+    DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")
+    DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"
 
-    // 自建 Docker Registry 
-    // DOCKER_REGISTRY_CREDENTIALS = credentials("self-docker-registry")    
-    // DOCKER_REGISTRY_REPOSITORY = "spencer810704/django-lab"
+    // For Custom Docker Registry
+    // DOCKER_REGISTRY_URL         = "myregistrydomain.com"
+    // DOCKER_REGISTRY_CREDENTIALS = credentials("self-docker-registry")
+    // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"
 
+    // ================== Kubernetes Information ==================
     // Kubernetes Namespace
     KUBERNETES_NAMESPACE = "devops"
 
     // Helm Chart Information
-    HELM_RELEASE_NAME    = "django-lab"
-    HELM_CHART_NAME      = "django-lab-chart"
+    HELM_RELEASE_NAME    = "$PROJECT_NAME"
+    HELM_CHART_NAME      = "$PROJECT_NAME-chart"
   }
   stages {
     // Clone Git repo
@@ -44,11 +50,11 @@ pipeline {
       }
     }
     stage("Show Jenkins Environment") {
-      
       steps {
         script {
+          // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
           String output = """\
-            ================ 以下為 Jenkinsfile 中定義的環境變數 ================ 
+            ==================== Jenkinsfile Environment ====================
             DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL ?: 'undefined'}
             DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
             IMAGE_TAG                   : ${IMAGE_TAG ?: 'undefined'}
@@ -57,17 +63,18 @@ pipeline {
             HELM_CHART_NAME             : ${HELM_CHART_NAME ?: 'undefined'}
             ================================================================== 
           """.stripIndent()
+          // 輸出內容
           echo output
         }
       }
     }
-    // // 建立Docker Image(設定 --no-cache 不使用 image cache)
-    // stage("Build Image") {
-    //   steps {
-    //     // 設定IMAGE_TAG為git commit 前六碼
-    //     sh "make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG"
-    //   }
-    // }
+    // 建立Docker Image(設定 --no-cache 不使用 image cache)
+    stage("Build Image") {
+      steps {
+        // 設定IMAGE_TAG為git commit 前六碼
+        sh "make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG"
+      }
+    }
     // // 登入Docker Registry
     // stage("Docker Login") {
     //   steps {
