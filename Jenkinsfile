@@ -47,17 +47,25 @@ pipeline {
       
       steps {
         script {
+          def FOO = env.FOO
+          def BAR = env.BAR
           String output = """\
             FOO: ${FOO=undefined}
             BAR: ${BAR=undefined}
-            DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL
-            DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
-            IMAGE_TAG: $IMAGE_TAG
-            KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE
-            HELM_RELEASE_NAME: $HELM_RELEASE_NAME
-            HELM_CHART_NAME: $HELM_CHART_NAME
           """
           echo output
+
+          // String output = """\
+          //   FOO: ${FOO=undefined}
+          //   BAR: ${BAR=undefined}
+          //   DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL
+          //   DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
+          //   IMAGE_TAG: $IMAGE_TAG
+          //   KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE
+          //   HELM_RELEASE_NAME: $HELM_RELEASE_NAME
+          //   HELM_CHART_NAME: $HELM_CHART_NAME
+          // """
+          // echo output
           // def output = ""
           // output += "DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL\n"
           // output += "DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY\n"
