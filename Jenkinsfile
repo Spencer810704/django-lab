@@ -44,16 +44,18 @@ pipeline {
       }
     }
     stage("Show Jenkins Environment") {
+      
       steps {
-        // 設定IMAGE_TAG為git commit 前六碼
-        sh """
-        echo DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL \nDOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
-        echo DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY
-        echo IMAGE_TAG: $IMAGE_TAG
-        echo KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE
-        echo HELM_RELEASE_NAME: $HELM_RELEASE_NAME
-        echo HELM_CHART_NAME: $HELM_CHART_NAME
-        """
+        script {
+          def output = ""
+          output += "DOCKER_REGISTRY_URL: $DOCKER_REGISTRY_URL\n"
+          output += "DOCKER_REGISTRY_REPOSITORY: $DOCKER_REGISTRY_REPOSITORY\n"
+          output += "IMAGE_TAG: $IMAGE_TAG\n"
+          output += "KUBERNETES_NAMESPACE: $KUBERNETES_NAMESPACE\n"
+          output += "HELM_RELEASE_NAME: $HELM_RELEASE_NAME\n"
+          output += "HELM_CHART_NAME: $HELM_CHART_NAME\n"
+          echo output
+        }
       }
     }
     // // 建立Docker Image(設定 --no-cache 不使用 image cache)
