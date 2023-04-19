@@ -38,14 +38,6 @@ pipeline {
         ])
       }
     }
-    stage('Get HEAD Commit hash code') {
-      steps {
-        // 設定IMAGE_TAG為git commit 前六碼
-        
-        // sh 'make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$(git rev-parse --short HEAD)'
-      }
-    }
-
     // 建立Docker Image(設定 --no-cache 不使用 image cache)
     stage('Build Image') {
       steps {
