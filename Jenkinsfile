@@ -46,10 +46,12 @@ pipeline {
     stage('Print environment') {
       steps {
         script {
-          // 需要安裝 Pipeline Utility Steps套件、
-          def envJson = sh(script: 'env | jq -R "split(\"\n\") | map(split(\"=\")) | map({key: .[0], value: .[1]}) | from_entries"', returnStdout: true)
-          def env = readJSON text: envJson
-          echo env
+          // 需要安裝 Pipeline Utility Steps套件
+          withEnv(['LC_CTYPE=en_US.UTF-8', 'LANG=en_US.UTF-8']) {
+            def envJson = sh(script: 'env | jq -R "split(\"\n\") | map(split(\"=\")) | map({key: .[0], value: .[1]}) | from_entries"', returnStdout: true)
+            def env = readJSON text: envJson
+            echo env
+          }
         }
       }
     }
