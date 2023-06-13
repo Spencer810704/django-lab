@@ -88,7 +88,7 @@ pipeline {
     stage("Deploy to kubernetes") {
       steps {
         withCredentials([file(credentialsId: "jenkins-kubeconfig", variable: "KUBECONFIG")]) {
-          sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values.yaml --dry-run --debug"
+          sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/secrets.yaml --dry-run --debug"
         }
       }
     }
