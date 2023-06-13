@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: django-lab
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
@@ -24,6 +24,7 @@ spec:
         - secretRef:
             name: "{{ .Release.Name }}-secrets"
         ports:
-        - containerPort:  {{ .Values.container.port }}
-          name:  django-lab
+        - name:  django-lab
+          containerPort:  {{ .Values.container.port }}
+          
       restartPolicy: Always

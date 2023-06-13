@@ -3,7 +3,6 @@ replicaCount: 1
 image:
   repository: spencer810704/django-lab
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 imagePullSecrets: []
