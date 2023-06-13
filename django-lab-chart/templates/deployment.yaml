@@ -24,6 +24,6 @@ spec:
         - secretRef:
             name: "{{ .Release.Name }}-secrets"
         ports:
-        - containerPort:  "{{ .Values.container.port }}"
+        - containerPort:  {{ .Values.container.port }}
           name:  django-lab
       restartPolicy: Always
