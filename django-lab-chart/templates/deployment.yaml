@@ -22,7 +22,7 @@ spec:
         - configMapRef:
             name: "{{ .Release.Name }}-configmap"
         - secretRef:
-            name: "django-lab-secrets"
+            name: "{{ .Release.Name }}-secrets"
         ports:
         - containerPort:  80
           name:  django-lab

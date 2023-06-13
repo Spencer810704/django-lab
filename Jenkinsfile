@@ -30,6 +30,9 @@ pipeline {
     // Helm Chart Information
     HELM_RELEASE_NAME    = "$PROJECT_NAME"
     HELM_CHART_NAME      = "$PROJECT_NAME-chart"
+    
+    // HELM SECRET PLUGIN 
+    SOPS_PGP_FP          = "73F88B4A3B8DFFE2D1EFB704D566664AE2AC5616"
   }
   stages {
     // Clone Git repo
@@ -55,12 +58,13 @@ pipeline {
           // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
           String output = """\
             ==================== Jenkinsfile Environment ====================
-            DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL ?: 'undefined'}
+            DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL        ?: 'undefined'}
             DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
-            IMAGE_TAG                   : ${IMAGE_TAG ?: 'undefined'}
-            KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE ?: 'undefined'}
-            HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME ?: 'undefined'}
-            HELM_CHART_NAME             : ${HELM_CHART_NAME ?: 'undefined'}
+            IMAGE_TAG                   : ${IMAGE_TAG                  ?: 'undefined'}
+            KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE       ?: 'undefined'}
+            HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME          ?: 'undefined'}
+            HELM_CHART_NAME             : ${HELM_CHART_NAME            ?: 'undefined'}
+            SOPS_PGP_FP                 : ${SOPS_PGP_FP                ?: 'undefined'}
             ================================================================== 
           """.stripIndent()
           // 輸出內容
