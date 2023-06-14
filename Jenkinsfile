@@ -4,35 +4,32 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: "5"))
   }
   environment {
-    // ====================== Project Information ======================
-    // 專案名稱
-    PROJECT_NAME = "django-lab"
-
-    // 取得 Git Commit Hash前六碼 作為Image Tag
-    IMAGE_TAG = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
-
-    // ================== Docker Registry Information ==================
+    // ================================================================== Project  ==================================================================
     
-    // For Docker HUB
-    DOCKER_REGISTRY_URL         = "registry-1.docker.io"
-    DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")
-    DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"
+    IMAGE_TAG = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()     // 取得 Git Commit Hash 前六碼 作為 Image Tag
+    PROJECT_NAME = "django-lab"                                                         // 專案名稱
 
-    // For Custom Docker Registry
-    // DOCKER_REGISTRY_URL         = "myregistrydomain.com"
-    // DOCKER_REGISTRY_CREDENTIALS = credentials("self-docker-registry")
-    // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"
-
-    // ================== Kubernetes Information ==================
-    // Kubernetes Namespace
-    KUBERNETES_NAMESPACE = "devops"
-
-    // Helm Chart Information
-    HELM_RELEASE_NAME    = "$PROJECT_NAME"
-    HELM_CHART_NAME      = "$PROJECT_NAME-chart"
+    // ============================================================== Docker Registry  ==============================================================
     
-    // HELM SECRET PLUGIN 
-    SOPS_PGP_FP          = "73F88B4A3B8DFFE2D1EFB704D566664AE2AC5616"
+    DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
+    DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
+    DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
+       
+    
+    // DOCKER_REGISTRY_URL         = "myregistrydomain.com"                             // Docker registry URL
+    // DOCKER_REGISTRY_CREDENTIALS = credentials("self-docker-registry")                // Docker registry Credentials
+    // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"   // Docker registry 倉庫地址
+
+    // ================================================================= Kubernetes  =================================================================
+    
+    KUBERNETES_NAMESPACE = "devops"                                                     // Kubernetes Namespace
+
+    HELM_CHART_NAME      = "$PROJECT_NAME-chart"                                        // Helm Chart Name
+    HELM_RELEASE_NAME    = "$PROJECT_NAME"                                              // Helm Release Name
+    
+    SOPS_PGP_FP          = "73F88B4A3B8DFFE2D1EFB704D566664AE2AC5616"                   // Helm-secret Plugin
+
+    // ================================================================================================================================================
   }
   stages {
     // Clone Git repo
@@ -56,7 +53,7 @@ pipeline {
       steps {
         script {
           // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
-          String output = """\
+          String output = """
             ==================== Jenkinsfile Environment ====================
             DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL        ?: 'undefined'}
             DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
