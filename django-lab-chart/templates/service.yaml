@@ -10,4 +10,5 @@ spec:
   ports:
     - protocol: {{ .Values.service.protocol | default "TCP" }}
       port: {{ .Values.service.port }}
+      nodePort: {{ .Values.service.nodePort }}
       targetPort: {{ .Values.service.targetPort }}
