@@ -32,7 +32,6 @@ pipeline {
     // ================================================================================================================================================
   }
   stages {
-    // Clone Git repo
     stage("Checkout Application Git Repository") {
       steps {
         checkout(changelog: false, poll: false, scm: [
