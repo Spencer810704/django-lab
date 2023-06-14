@@ -2,10 +2,6 @@ replicaCount: 1
 
 restartPolicy: Always
 
-project:
-  name: django-lab
-  namespace: devops
-
 service:
   type: NodePort
   port: 80

@@ -5,7 +5,7 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
 spec:
   selector:
-    app:  "{{ .Values.project.name }}"
+    app:  "{{ .Release.Name }}"
   type: {{ .Values.service.type }}
   ports:
     - protocol: {{ .Values.service.protocol | default "TCP" }}
