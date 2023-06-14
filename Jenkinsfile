@@ -72,21 +72,21 @@ pipeline {
         }
       }
     }
-    // 建立Docker Image(設定 --no-cache 不使用 image cache)
     stage("Build Image") {
       steps {
+        // 建立Docker Image(設定 --no-cache 不使用 image cache)
         sh "make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG"
       }
     }
-    // 登入Docker Registry
     stage("Docker login and push image") {
       steps {
+        // 登入Docker Registry
         sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=$DOCKER_REGISTRY_URL DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG"
       }
     }
-    // 使用Helm部署至Kubernetes
     stage("Deploy to kubernetes") {
       steps {
+        // 使用Helm部署至Kubernetes
         withCredentials([file(credentialsId: "jenkins-kubeconfig", variable: "KUBECONFIG")]) {
           sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/secrets.yaml"
         }

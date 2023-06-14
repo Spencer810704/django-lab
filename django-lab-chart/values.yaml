@@ -6,11 +6,6 @@ project:
   name: django-lab
   namespace: devops
 
-image:
-  repository: spencer810704/django-lab
-  pullPolicy: IfNotPresent
-  # tag: "latest"
-
 service:
   type: NodePort
   port: 80
