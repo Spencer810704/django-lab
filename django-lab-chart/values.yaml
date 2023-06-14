@@ -1,17 +1,15 @@
 replicaCount: 1
 
+project:
+  name: django-lab
+  namespace: devops
+
 image:
   repository: spencer810704/django-lab
   pullPolicy: IfNotPresent
   tag: "latest"
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
 service:
   type: ClusterIP
   port: 80
-
-container:
-  port: 80
+  targetPort: 80

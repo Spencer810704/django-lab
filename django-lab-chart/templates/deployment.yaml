@@ -1,30 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  django-lab
-  namespace: devops
+  name:  "{{ .Values.project.name }}"
+  namespace: "{{ .Values.project.namespace }}"
   labels:
-    app:  django-lab
+    app:  "{{ .Values.project.name }}"
 spec:
   selector:
     matchLabels:
-      app: django-lab
+      app: "{{ .Values.project.name }}"
   replicas: {{ .Values.replicaCount }}
   template:
     metadata:
       labels:
-        app:  django-lab
+        app:  "{{ .Values.project.name }}"
     spec:
       containers:
-      - name:  django-lab
+      - name:  "{{ .Values.project.name }}"
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         envFrom:
         - configMapRef:
             name: "{{ .Release.Name }}-configmap"
         - secretRef:
             name: "{{ .Release.Name }}-secrets"
-        ports:
-        - name:  django-lab
-          containerPort:  {{ .Values.container.port }}
-          
-      restartPolicy: Always
+      restartPolicy: "{{ .Values.restartPolicy }}"
