@@ -5,23 +5,27 @@ pipeline {
   }
   triggers {
       gitlab(
-        triggerOnPush: false,
-        triggerOnMergeRequest: true, triggerOpenMergeRequestOnPush: "never",
-        triggerOnNoteRequest: true,
+        triggerOnPush: true,
+        triggerOnMergeRequest: false, 
+        triggerOpenMergeRequestOnPush: "never",
+        triggerOnNoteRequest: false,
         noteRegex: "Jenkins please retry a build",
         skipWorkInProgressMergeRequest: true,
         ciSkip: false,
-        setBuildDescription: true,
-        addNoteOnMergeRequest: true,
-        addCiMessage: true,
-        addVoteOnMergeRequest: true,
+        setBuildDescription: false,
+        addNoteOnMergeRequest: false,
+        addCiMessage: false,
+        addVoteOnMergeRequest: false,
         acceptMergeRequestOnSuccess: false,
         branchFilterType: "NameBasedFilter",
         includeBranchesSpec: "release/qat",
         excludeBranchesSpec: "",
         pendingBuildName: "Jenkins",
         cancelPendingBuildsOnUpdate: false,
-        secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+        // 因為 Secret Token 是在 Jenkinsfile 中管理 , 所以需要注意該專案的Viewer權限(Private repo)只能給特定團隊成員 , 否則任何人有 secret token 就可以觸發該任務
+        // 另外也能從 Jenkins Job 修改組態的設定中生成 , 如果是這種方式需要特別設置該 Job 只能給特定用戶修改組態權限
+        secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF"
+        )
   }
   environment {
     // ================================================================== Project  ==================================================================
