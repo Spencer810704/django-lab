@@ -3,6 +3,26 @@ pipeline {
   options {
     buildDiscarder(logRotator(numToKeepStr: "5"))
   }
+  triggers {
+      gitlab(
+        triggerOnPush: false,
+        triggerOnMergeRequest: true, triggerOpenMergeRequestOnPush: "never",
+        triggerOnNoteRequest: true,
+        noteRegex: "Jenkins please retry a build",
+        skipWorkInProgressMergeRequest: true,
+        ciSkip: false,
+        setBuildDescription: true,
+        addNoteOnMergeRequest: true,
+        addCiMessage: true,
+        addVoteOnMergeRequest: true,
+        acceptMergeRequestOnSuccess: false,
+        branchFilterType: "NameBasedFilter",
+        includeBranchesSpec: "release/qat",
+        excludeBranchesSpec: "",
+        pendingBuildName: "Jenkins",
+        cancelPendingBuildsOnUpdate: false,
+        secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF")
+  }
   environment {
     // ================================================================== Project  ==================================================================
     
