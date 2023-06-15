@@ -2,6 +2,7 @@ pipeline {
   agent any
   options {
     buildDiscarder(logRotator(numToKeepStr: "5"))
+    gitLabConnection('gitlab')
   }
   triggers {
       gitlab(
