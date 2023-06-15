@@ -74,6 +74,8 @@ pipeline {
     }
     stage("Show Jenkins Environment") {
       steps {
+        updateGitlabCommitStatus name: 'build', state: 'pending'
+
         script {
           // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
           String output = """
@@ -108,12 +110,18 @@ pipeline {
       steps {
         // 使用Helm部署至Kubernetes
         withCredentials([file(credentialsId: "jenkins-kubeconfig", variable: "KUBECONFIG")]) {
-          sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/secrets.yaml"
+          sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
         }
       }
     }
   }
   post {
+    failure {
+        updateGitlabCommitStatus name: 'build', state: 'failed'
+    }
+    success {
+        updateGitlabCommitStatus name: 'build', state: 'success'
+    }
     always {
       sh "docker logout $DOCKER_REGISTRY_URL"
     }
