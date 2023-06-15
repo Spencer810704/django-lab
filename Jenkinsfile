@@ -1,8 +1,8 @@
 pipeline {
   agent any
   options {
-    buildDiscarder(logRotator(numToKeepStr: "5"))
-    gitLabConnection('gitlab')
+    buildDiscarder(logRotator(numToKeepStr: "5"))         // 建置紀錄只保留5份
+    gitLabConnection('gitlab')                            // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab (Pending、Success、Failed)
   }
   triggers {
       gitlab(
