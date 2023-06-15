@@ -2,9 +2,10 @@ pipeline {
   agent any
   options {
     buildDiscarder(logRotator(numToKeepStr: "5"))         // 建置紀錄只保留5份
-    gitLabConnection('gitlab')                            // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab (Pending、Success、Failed)
+    gitLabConnection('gitlab')                            // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab Pipeline (Pending、Success、Failed)
   }
   triggers {
+      // 設置 Gitlab Webhook Trigger
       gitlab(
         triggerOnPush: true,
         triggerOnMergeRequest: false, 
@@ -75,6 +76,7 @@ pipeline {
     }
     stage("Show Jenkins Environment") {
       steps {
+        // 更新 Gitlab Pipeline 中的建置狀態
         updateGitlabCommitStatus name: 'build', state: 'pending'
 
         script {
@@ -118,9 +120,11 @@ pipeline {
   }
   post {
     failure {
+        // 更新 Gitlab Pipeline 中的建置狀態
         updateGitlabCommitStatus name: 'build', state: 'failed'
     }
     success {
+        // 更新 Gitlab Pipeline 中的建置狀態
         updateGitlabCommitStatus name: 'build', state: 'success'
     }
     always {
