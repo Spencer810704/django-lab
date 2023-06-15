@@ -2,7 +2,9 @@ pipeline {
   agent any
   options {
     buildDiscarder(logRotator(numToKeepStr: "5"))         // 建置紀錄只保留5份
-    gitLabConnection('gitlab')                            // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab Pipeline (Pending、Success、Failed)
+    gitLabConnection('gitlab')                            // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab Pipeline (Pending、Success、Failed) , 
+                                                          // 注意：需要在 『管理 Jenkins』-> 『設定系統』->『Gitlab』-> 把 『Enable authentication for '/project' end-point』選項取消 , 否則會回寫失敗 , 出現403錯誤
+                                                          // 為什麼造成這個原因目前還沒特別去查
   }
   triggers {
       // 設置 Gitlab Webhook Trigger
@@ -19,6 +21,7 @@ pipeline {
         addCiMessage: false,
         addVoteOnMergeRequest: false,
         acceptMergeRequestOnSuccess: false,
+        // 設置哪一些 Branch 的異動時，可以觸發此Pipeline
         branchFilterType: "NameBasedFilter",
         includeBranchesSpec: "main",
         excludeBranchesSpec: "",
