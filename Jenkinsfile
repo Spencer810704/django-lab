@@ -102,18 +102,18 @@ pipeline {
                 }
             }
         }
-        // stage("Build Image") {
-        //     steps {
-        //         // 建立Docker Image(設定 --no-cache 不使用 image cache)
-        //         sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
-        //     }
-        // }
-        // stage("Docker login and push image") {
-        //     steps {
-        //         // 登入Docker Registry
-        //         sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
-        //     }
-        // }
+        stage("Build Image") {
+            steps {
+                // 建立Docker Image(設定 --no-cache 不使用 image cache)
+                sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
+            }
+        }
+        stage("Docker login and push image") {
+            steps {
+                // 登入Docker Registry
+                sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
+            }
+        }
         stage("Deploy to kubernetes") {
             steps {
                 script {
