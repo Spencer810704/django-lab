@@ -79,6 +79,7 @@ pipeline {
             }
         } // end of setup environment
         
+        // show environment
         stage("Show Jenkins Environment") {
             steps {
                 // 更新 Gitlab Pipeline 中的建置狀態
@@ -101,19 +102,25 @@ pipeline {
                 echo output
                 }
             }
-        }
+        } // end of show environment
+        
+        // build image
         stage("Build Image") {
             steps {
                 // 建立Docker Image(設定 --no-cache 不使用 image cache)
                 sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
             }
-        }
+        } // end of build image
+        
+        // push image 
         stage("Docker login and push image") {
             steps {
                 // 登入Docker Registry
                 sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
             }
-        }
+        } // end of push image
+
+        // deploy 
         stage("Deploy to kubernetes") {
             steps {
                 script {
@@ -133,15 +140,15 @@ pipeline {
                     }   
                 }
             }
-        }
+        } // end of deploy
     }
     post {
         failure {
-            // 更新 Gitlab Pipeline 中的建置狀態
+            // update Gitlab Pipeline status
             updateGitlabCommitStatus name: 'build', state: 'failed'
         }
         success {
-            // 更新 Gitlab Pipeline 中的建置狀態
+            // update Gitlab Pipeline status
             updateGitlabCommitStatus name: 'build', state: 'success'
         }
         always {
