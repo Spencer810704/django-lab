@@ -39,20 +39,15 @@ pipeline {
         ENVIRONMENT   = "prod"                                                                // define environment
         GIT_REPO      = "git@gitlab.example.com:it/django-lab.git"                            // define git repo url
         BRANCH        = "main"                                                                // define git repo branch
-        REVISION      = "main"
         IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
         PROJECT_NAME  = "django-lab"                                                          // define project name
         WORKSPACE_DIR = "${WORKSPACE}/${BUILD_ID}"                                            // define workspace
 
         // ============================================================== Docker Image Repository  ==============================================================
 
-        DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
-        DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
-        DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
-            
-        // DOCKER_REGISTRY_URL         = "myregistrydomain.com"                             // Docker registry URL
-        // DOCKER_REGISTRY_CREDENTIALS = credentials("self-docker-registry")                // Docker registry Credentials
-        // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"   // Docker registry 倉庫地址
+        // DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
+        // DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
+        // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
 
         // ================================================================= Kubernetes  =================================================================
 
@@ -73,12 +68,27 @@ pipeline {
                     switch (env.ENVIRONMENT) {
                         case ["sit"]:
                             env.KUBECONFIG = "sit_jenkins_kubeconfig"
+
+                            // Docker Image Repository
+                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
+                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
+                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                         case ["stg"]:
                             env.KUBECONFIG = "stg_jenkins_kubeconfig"
+
+                            // Docker Image Repository
+                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
+                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
+                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                         case ["prod"]:
                             env.KUBECONFIG = "prod_jenkins_kubeconfig"
+                            
+                            // Docker Image Repository
+                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
+                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
+                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
                 }
