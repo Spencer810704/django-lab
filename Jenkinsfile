@@ -38,7 +38,8 @@ pipeline {
         
         ENVIRONMENT   = "prod"                                                                // define environment
         GIT_REPO      = "git@gitlab.example.com:it/django-lab.git"                            // define git repo url
-        BRANCH        = "master"                                                              // define git repo branch
+        BRANCH        = "main"                                                                // define git repo branch
+        REVISION      = "main"
         IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
         PROJECT_NAME  = "django-lab"                                                          // define project name
         WORKSPACE_DIR = "${WORKSPACE}/${BUILD_ID}"                                            // define workspace
@@ -90,9 +91,7 @@ pipeline {
         stage('Git checkout') {
             steps {
                 dir(WORKSPACE_DIR) {
-                    git url: "${GIT_REPO}",
-                            credentialsId: "${GITKEY}",
-                            branch: "${BRANCH}"
+                    git url: "${GIT_REPO}", credentialsId: "${GITKEY}", branch: "${BRANCH}"
                 }
 
                 dir(WORKSPACE_DIR) {
