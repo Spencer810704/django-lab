@@ -154,8 +154,8 @@ pipeline {
         always {
             sh "docker logout $DOCKER_REGISTRY_URL"
         }
-        // cleanup {
-        //     cleanWs()
-        // }
+        cleanup {
+            cleanWs()
+        }
     }
 }
