@@ -72,19 +72,13 @@ pipeline {
                 script {
                     switch (env.ENVIRONMENT) {
                         case ["sit"]:
-                            env.KUBECONFIG = "jenkins-kubeconfig"
-                            // env.KUBECONFIG = "sit_jenkins_kubeconfig"
-                            env.GITKEY = "gitlab_deploy_key"
+                            env.KUBECONFIG = "sit_jenkins_kubeconfig"
                             break
                         case ["stg"]:
-                            env.KUBECONFIG = "jenkins-kubeconfig"
-                            // env.KUBECONFIG = "stg_jenkins_kubeconfig"
-                            env.GITKEY = "gitlab_deploy_key"
+                            env.KUBECONFIG = "stg_jenkins_kubeconfig"
                             break
                         case ["prod"]:
-                            env.KUBECONFIG = "jenkins-kubeconfig"
-                            // env.KUBECONFIG = "prod_jenkins_kubeconfig"
-                            env.GITKEY = "gitlab_deploy_key"
+                            env.KUBECONFIG = "prod_jenkins_kubeconfig"
                             break
                     }
                 }
@@ -129,7 +123,7 @@ pipeline {
         stage("Deploy to kubernetes") {
             steps {
                 script {
-                    // 使用Helm部署至Kubernetes
+                    // 使用Helm部署至Kubernetes 
                     withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
                         switch (env.ENVIRONMENT) {
                             case ["sit"]:
