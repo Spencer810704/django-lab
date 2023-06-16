@@ -50,7 +50,7 @@ pipeline {
 
         // ================================================================= Kubernetes  =================================================================
 
-        KUBERNETES_NAMESPACE = "prod"                                                       // Kubernetes Namespace
+        KUBERNETES_NAMESPACE = "$ENVIRONMENT"                                               // Kubernetes Namespace
 
         HELM_CHART_NAME      = "$PROJECT_NAME-chart"                                        // Helm Chart Name
         HELM_RELEASE_NAME    = "$PROJECT_NAME"                                              // Helm Release Name
@@ -124,17 +124,14 @@ pipeline {
                                 sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
                                 break
                             case ["stg"]:
-                                    sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
                                 break
                             case ["prod"]:
-                                    sh 'echo $KUBECONFIG'
-                                    sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
                                 break
                         }
-                    }
-                    
+                    }   
                 }
-                
             }
         }
     }
