@@ -88,7 +88,7 @@ pipeline {
                             // Docker Image Repository
                             env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
                             env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
+                            echo "${env}"
                             env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
