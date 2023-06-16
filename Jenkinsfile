@@ -56,7 +56,7 @@ pipeline {
 
         // ================================================================= Kubernetes  =================================================================
 
-        KUBERNETES_NAMESPACE = "devops"                                                     // Kubernetes Namespace
+        KUBERNETES_NAMESPACE = "prod"                                                       // Kubernetes Namespace
 
         HELM_CHART_NAME      = "$PROJECT_NAME-chart"                                        // Helm Chart Name
         HELM_RELEASE_NAME    = "$PROJECT_NAME"                                              // Helm Release Name
@@ -72,15 +72,18 @@ pipeline {
                 script {
                     switch (env.ENVIRONMENT) {
                         case ["sit"]:
-                            env.KUBECONFIG = "sit_jenkins_kubeconfig"
+                            env.KUBECONFIG = "jenkins-kubeconfig"
+                            // env.KUBECONFIG = "sit_jenkins_kubeconfig"
                             env.GITKEY = "gitlab_deploy_key"
                             break
                         case ["stg"]:
-                            env.KUBECONFIG = "stg_jenkins_kubeconfig"
+                            env.KUBECONFIG = "jenkins-kubeconfig"
+                            // env.KUBECONFIG = "stg_jenkins_kubeconfig"
                             env.GITKEY = "gitlab_deploy_key"
                             break
                         case ["prod"]:
-                            env.KUBECONFIG = "prod_jenkins_kubeconfig"
+                            env.KUBECONFIG = "jenkins-kubeconfig"
+                            // env.KUBECONFIG = "prod_jenkins_kubeconfig"
                             env.GITKEY = "gitlab_deploy_key"
                             break
                     }
@@ -123,14 +126,28 @@ pipeline {
                 sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=$DOCKER_REGISTRY_URL DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG"
             }
         }
-        // stage("Deploy to kubernetes") {
-        //     steps {
-        //         // 使用Helm部署至Kubernetes
-        //         withCredentials([file(credentialsId: "jenkins-kubeconfig", variable: "KUBECONFIG")]) {
-        //             sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
-        //         }
-        //     }
-        // }
+        stage("Deploy to kubernetes") {
+            steps {
+                script {
+                    // 使用Helm部署至Kubernetes
+                    withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
+                        switch (env.ENVIRONMENT) {
+                            case ["sit"]:
+                                sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
+                                break
+                            case ["stg"]:
+                                    sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+                                break
+                            case ["prod"]:
+                                    sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+                                break
+                        }
+                    }
+                    
+                }
+                
+            }
+        }
     }
     post {
         failure {
