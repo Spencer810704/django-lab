@@ -5,5 +5,5 @@ restartPolicy: Always
 service:
   type: NodePort
   port: 80
-  nodePort: 30001
+  nodePort: 32001
   targetPort: 80
