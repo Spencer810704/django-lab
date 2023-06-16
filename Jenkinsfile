@@ -87,18 +87,6 @@ pipeline {
                 }
             }
         } // end of setup environment
-        // git checkout
-        // stage('Git checkout') {
-        //     steps {
-        //         dir(WORKSPACE_DIR) {
-        //             git url: "${GIT_REPO}", credentialsId: "${GITKEY}", branch: "${BRANCH}"
-        //         }
-
-        //         dir(WORKSPACE_DIR) {
-        //             sh("git checkout ${REVISION}")
-        //         }
-        //     }
-        // } // end of stage
         
         stage("Show Jenkins Environment") {
             steps {
@@ -123,18 +111,18 @@ pipeline {
                 }
             }
         }
-        // stage("Build Image") {
-        //     steps {
-        //         // 建立Docker Image(設定 --no-cache 不使用 image cache)
-        //         sh "make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG"
-        //     }
-        // }
-        // stage("Docker login and push image") {
-        //     steps {
-        //         // 登入Docker Registry
-        //         sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=$DOCKER_REGISTRY_URL DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG"
-        //     }
-        // }
+        stage("Build Image") {
+            steps {
+                // 建立Docker Image(設定 --no-cache 不使用 image cache)
+                sh "make build DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR IMAGE_TAG=$IMAGE_TAG"
+            }
+        }
+        stage("Docker login and push image") {
+            steps {
+                // 登入Docker Registry
+                sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=$DOCKER_REGISTRY_URL DOCKER_REGISTRY_PASSWORD=$DOCKER_REGISTRY_CREDENTIALS_PSW IMAGE_TAG=$IMAGE_TAG"
+            }
+        }
         // stage("Deploy to kubernetes") {
         //     steps {
         //         // 使用Helm部署至Kubernetes
@@ -158,9 +146,7 @@ pipeline {
         }
         cleanup {
             sh("echo Cleaning directory ${WORKSPACE_DIR}")
-            dir(WORKSPACE_DIR) {
-                deleteDir()
-            }
+            cleanWs()
         }
     }
 }
