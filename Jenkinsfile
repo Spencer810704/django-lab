@@ -88,7 +88,7 @@ pipeline {
                             // Docker Image Repository
                             env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
                             env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            sh "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
+                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
                             env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
@@ -105,13 +105,13 @@ pipeline {
                 // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
                 String output = """
                     ==================== Jenkinsfile Environment ====================
-                    IMAGE_TAG                   : ${IMAGE_TAG                  ?: 'undefined'}
+                    IMAGE_TAG                   : ${env.IMAGE_TAG                  ?: 'undefined'}
                     DOCKER_REGISTRY_URL         : ${env.DOCKER_REGISTRY_URL        ?: 'undefined'}
                     DOCKER_REGISTRY_REPOSITORY  : ${env.DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
-                    KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE       ?: 'undefined'}
-                    HELM_CHART_NAME             : ${HELM_CHART_NAME            ?: 'undefined'}
-                    HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME          ?: 'undefined'}
-                    SOPS_PGP_FP                 : ${SOPS_PGP_FP                ?: 'undefined'}
+                    KUBERNETES_NAMESPACE        : ${env.KUBERNETES_NAMESPACE       ?: 'undefined'}
+                    HELM_CHART_NAME             : ${env.HELM_CHART_NAME            ?: 'undefined'}
+                    HELM_RELEASE_NAME           : ${env.HELM_RELEASE_NAME          ?: 'undefined'}
+                    SOPS_PGP_FP                 : ${env.SOPS_PGP_FP                ?: 'undefined'}
                     ================================================================== 
                 """.stripIndent()
                 // 輸出內容
