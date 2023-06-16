@@ -99,45 +99,30 @@ pipeline {
                 }
             }
         } // end of stage
-        // stage("Checkout Application Git Repository") {
-        //     steps {
-        //         checkout(changelog: false, poll: false, scm: [
-        //             $class: "GitSCM",
-        //             branches: [
-        //             [name: "*/main"],
-        //             ],
-        //             userRemoteConfigs: [
-        //             [
-        //                 url: "git@gitlab.example.com:it/django-lab.git",
-        //                 credentialsId: "gitlab_deploy_key"
-        //             ],
-        //             ],
-        //         ])
-        //     }
-        // }
-        // stage("Show Jenkins Environment") {
-        //     steps {
-        //         // 更新 Gitlab Pipeline 中的建置狀態
-        //         updateGitlabCommitStatus name: 'build', state: 'pending'
+        
+        stage("Show Jenkins Environment") {
+            steps {
+                // 更新 Gitlab Pipeline 中的建置狀態
+                updateGitlabCommitStatus name: 'build', state: 'pending'
 
-        //         script {
-        //         // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
-        //         String output = """
-        //             ==================== Jenkinsfile Environment ====================
-        //             IMAGE_TAG                   : ${IMAGE_TAG                  ?: 'undefined'}
-        //             DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL        ?: 'undefined'}
-        //             DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
-        //             KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE       ?: 'undefined'}
-        //             HELM_CHART_NAME             : ${HELM_CHART_NAME            ?: 'undefined'}
-        //             HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME          ?: 'undefined'}
-        //             SOPS_PGP_FP                 : ${SOPS_PGP_FP                ?: 'undefined'}
-        //             ================================================================== 
-        //         """.stripIndent()
-        //         // 輸出內容
-        //         echo output
-        //         }
-        //     }
-        // }
+                script {
+                // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
+                String output = """
+                    ==================== Jenkinsfile Environment ====================
+                    IMAGE_TAG                   : ${IMAGE_TAG                  ?: 'undefined'}
+                    DOCKER_REGISTRY_URL         : ${DOCKER_REGISTRY_URL        ?: 'undefined'}
+                    DOCKER_REGISTRY_REPOSITORY  : ${DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
+                    KUBERNETES_NAMESPACE        : ${KUBERNETES_NAMESPACE       ?: 'undefined'}
+                    HELM_CHART_NAME             : ${HELM_CHART_NAME            ?: 'undefined'}
+                    HELM_RELEASE_NAME           : ${HELM_RELEASE_NAME          ?: 'undefined'}
+                    SOPS_PGP_FP                 : ${SOPS_PGP_FP                ?: 'undefined'}
+                    ================================================================== 
+                """.stripIndent()
+                // 輸出內容
+                echo output
+                }
+            }
+        }
         // stage("Build Image") {
         //     steps {
         //         // 建立Docker Image(設定 --no-cache 不使用 image cache)
@@ -170,6 +155,12 @@ pipeline {
         }
         always {
             sh "docker logout $DOCKER_REGISTRY_URL"
+        }
+        cleanup {
+            sh("echo Cleaning directory ${WORKSPACE_DIR}")
+            dir(WORKSPACE_DIR) {
+                deleteDir()
+            }
         }
     }
 }
