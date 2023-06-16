@@ -88,6 +88,7 @@ pipeline {
                             // Docker Image Repository
                             env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
                             env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
+                            sh "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
                             env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
@@ -118,40 +119,40 @@ pipeline {
                 }
             }
         }
-        stage("Build Image") {
-            steps {
-                // 建立Docker Image(設定 --no-cache 不使用 image cache)
-                sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
-            }
-        }
-        stage("Docker login and push image") {
-            steps {
-                // 登入Docker Registry
-                sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
-            }
-        }
-        stage("Deploy to kubernetes") {
-            steps {
-                script {
-                    // 使用Helm部署至Kubernetes 
-                    withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
-                        switch (env.ENVIRONMENT) {
-                            case ["sit"]:
-                                sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
-                                break
-                            case ["stg"]:
-                                    sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
-                                break
-                            case ["prod"]:
-                                    sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
-                                break
-                        }
-                    }
+        // stage("Build Image") {
+        //     steps {
+        //         // 建立Docker Image(設定 --no-cache 不使用 image cache)
+        //         sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
+        //     }
+        // }
+        // stage("Docker login and push image") {
+        //     steps {
+        //         // 登入Docker Registry
+        //         sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
+        //     }
+        // }
+        // stage("Deploy to kubernetes") {
+        //     steps {
+        //         script {
+        //             // 使用Helm部署至Kubernetes 
+        //             withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
+        //                 switch (env.ENVIRONMENT) {
+        //                     case ["sit"]:
+        //                         sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
+        //                         break
+        //                     case ["stg"]:
+        //                             sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+        //                         break
+        //                     case ["prod"]:
+        //                             sh "helm secrets upgrade --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+        //                         break
+        //                 }
+        //             }
                     
-                }
+        //         }
                 
-            }
-        }
+        //     }
+        // }
     }
     post {
         failure {
