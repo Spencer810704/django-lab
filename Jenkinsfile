@@ -88,17 +88,17 @@ pipeline {
             }
         } // end of setup environment
         // git checkout
-        stage('Git checkout') {
-            steps {
-                dir(WORKSPACE_DIR) {
-                    git url: "${GIT_REPO}", credentialsId: "${GITKEY}", branch: "${BRANCH}"
-                }
+        // stage('Git checkout') {
+        //     steps {
+        //         dir(WORKSPACE_DIR) {
+        //             git url: "${GIT_REPO}", credentialsId: "${GITKEY}", branch: "${BRANCH}"
+        //         }
 
-                dir(WORKSPACE_DIR) {
-                    sh("git checkout ${REVISION}")
-                }
-            }
-        } // end of stage
+        //         dir(WORKSPACE_DIR) {
+        //             sh("git checkout ${REVISION}")
+        //         }
+        //     }
+        // } // end of stage
         
         stage("Show Jenkins Environment") {
             steps {
