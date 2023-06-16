@@ -151,6 +151,7 @@ pipeline {
             updateGitlabCommitStatus name: 'build', state: 'success'
         }
         always {
+            // logout docker registry
             sh "docker logout $DOCKER_REGISTRY_URL"
         }
         cleanup {
