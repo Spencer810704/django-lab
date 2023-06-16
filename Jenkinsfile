@@ -41,13 +41,12 @@ pipeline {
         BRANCH        = "main"                                                                // define git repo branch
         IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
         PROJECT_NAME  = "django-lab"                                                          // define project name
-        WORKSPACE_DIR = "${WORKSPACE}/${BUILD_ID}"                                            // define workspace
 
         // ============================================================== Docker Image Repository  ==============================================================
 
-        // DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
-        // DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
-        // DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
+        DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
+        DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
+        DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
 
         // ================================================================= Kubernetes  =================================================================
 
@@ -74,14 +73,6 @@ pipeline {
                             break
                         case ["prod"]:
                             env.KUBECONFIG = "prod_jenkins_kubeconfig"
-                            
-                            // Docker Image Repository
-                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
-                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            echo "${env.DOCKER_REGISTRY_CREDENTIALS}"
-                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
-                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_PSW}"
-                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
                 }
@@ -159,7 +150,6 @@ pipeline {
             sh "docker logout $DOCKER_REGISTRY_URL"
         }
         cleanup {
-            sh("echo Cleaning directory ${WORKSPACE_DIR}")
             cleanWs()
         }
     }
