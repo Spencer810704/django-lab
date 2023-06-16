@@ -68,19 +68,9 @@ pipeline {
                     switch (env.ENVIRONMENT) {
                         case ["sit"]:
                             env.KUBECONFIG = "sit_jenkins_kubeconfig"
-
-                            // Docker Image Repository
-                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
-                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                         case ["stg"]:
                             env.KUBECONFIG = "stg_jenkins_kubeconfig"
-
-                            // Docker Image Repository
-                            env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
-                            env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                         case ["prod"]:
                             env.KUBECONFIG = "prod_jenkins_kubeconfig"
@@ -88,7 +78,9 @@ pipeline {
                             // Docker Image Repository
                             env.DOCKER_REGISTRY_URL = "registry-1.docker.io"
                             env.DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub") 
-                            echo "${env}"
+                            echo "${env.DOCKER_REGISTRY_CREDENTIALS}"
+                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_USR}"
+                            echo "${env.DOCKER_REGISTRY_CREDENTIALS_PSW}"
                             env.DOCKER_REGISTRY_REPOSITORY = "${env.DOCKER_REGISTRY_CREDENTIALS_USR}/${PROJECT_NAME}"
                             break
                     }
