@@ -120,27 +120,27 @@ pipeline {
             }
         } // end of push image
 
-        // // deploy 
-        // stage("Deploy to kubernetes") {
-        //     steps {
-        //         script {
-        //             // 使用Helm部署至Kubernetes 
-        //             withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
-        //                 switch (env.ENVIRONMENT) {
-        //                     case ["sit"]:
-        //                         sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
-        //                         break
-        //                     case ["stg"]:
-        //                         sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
-        //                         break
-        //                     case ["prod"]:
-        //                         sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
-        //                         break
-        //                 }
-        //             }   
-        //         }
-        //     }
-        // } // end of deploy
+        // deploy 
+        stage("Deploy to kubernetes") {
+            steps {
+                script {
+                    // 使用Helm部署至Kubernetes 
+                    withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
+                        switch (env.ENVIRONMENT) {
+                            case ["sit"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=sit --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
+                                break
+                            case ["stg"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=stg --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+                                break
+                            case ["prod"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=prod --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+                                break
+                        }
+                    }   
+                }
+            }
+        } // end of deploy
     }
     post {
         failure {

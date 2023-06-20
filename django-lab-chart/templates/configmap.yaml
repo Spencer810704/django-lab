@@ -8,4 +8,4 @@ data:
   DJANGO_ALLOWED_HOSTS: "*"
   DATABASE_ENGINE: "postgresql_psycopg2"
   DJANGO_LOGLEVEL: "info"
-  
+  ENVIRONMENT: "{{ .Values.environment }}"
