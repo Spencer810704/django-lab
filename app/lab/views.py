@@ -3,6 +3,8 @@ import os
 # Create your views here.
 
 def index(request):
-    env =  os.environ.get("ENVIRONMENT")
+    for name, value in os.environ.items():
+        env = env + f"{name}: {value}\n"
+    # env =  os.environ.get("ENVIRONMENT")
     return HttpResponse(f"Hello, world. Environment: {env}")
     
