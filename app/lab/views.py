@@ -13,3 +13,5 @@ def index(request):
 def logout(request):
     return HttpResponse(f"logout")
     
+
+    
