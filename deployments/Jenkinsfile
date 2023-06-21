@@ -23,7 +23,7 @@ pipeline {
             acceptMergeRequestOnSuccess: false,
             // 設置哪一些 Branch 的異動時，可以觸發此Pipeline
             branchFilterType: "NameBasedFilter",
-            includeBranchesSpec: "main",
+            includeBranchesSpec: "master",
             excludeBranchesSpec: "",
             // pendingBuildName: "build",
             cancelPendingBuildsOnUpdate: false,
@@ -40,7 +40,7 @@ pipeline {
         // ================================================================== Project  ==================================================================
         
         GIT_REPO      = "git@gitlab.example.com:it/django-lab.git"                            // define git repo url
-        BRANCH        = "main"                                                                // define git repo branch
+        BRANCH        = "master"                                                                // define git repo branch
         IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
         PROJECT_NAME  = "django-lab"                                                          // define project name
 
