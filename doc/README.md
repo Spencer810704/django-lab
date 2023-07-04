@@ -13,11 +13,17 @@
 # Architecture
 
 
-![系統連接圖](Architecture.jpg)
+![](Architecture.jpg)
+說明:
+1. 開發人員 Push Code 至 Gitlab
+2. 建立各環境 Jenkins Job (SIT / STG / PROD)
+3. 各環境 Jenkins Job 會使用不同的 Kubeconfig 管理對應環境的namespace
+4. 
 
-
-![Deploy Image](Architecture1.jpg)
-
+![](Architecture1.jpg)
+說明:
+1. 由
+2. 
 
 
 # Prerequisite
