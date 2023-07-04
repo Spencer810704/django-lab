@@ -8,4 +8,10 @@ def index(request):
         env_var = env_var + f"{name}: {value}<br/>"
     env =  os.environ.get("ENVIRONMENT")
     return HttpResponse(f"Environment: {env}<br/><br/> Variables:{env_var}")
+
+
+def logout(request):
+    return HttpResponse(f"logout")
+    
+
     
