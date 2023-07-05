@@ -136,7 +136,7 @@ logging.config.dictConfig({
 })
 
 ```
-因在Kubernetes中 , 我們也能夠將 secret 或者是 configmap 等方式注入到 Pod 內系統環境變數中 , 而 Django 也可以透過 os.getenv() 方法取得系統環境變數 , 透過這樣的方式取得實際配置 , 將配置內容與程式碼分離 , 相較於將DB資訊或 SECRET_KEY 等等機敏資訊直接儲存在 Code 裏面 , 還是透過這種分離的方式較為安全。
+因在Kubernetes中 , 我們也能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過這樣的方式取得實際配置 , 將配置內容與程式碼分離 , 相較於將DB資訊或 SECRET_KEY 等等機敏資訊直接儲存在 Code 裏面 , 還是透過這種分離的方式較為安全。
 
 
 
