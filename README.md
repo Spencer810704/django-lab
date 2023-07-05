@@ -3,6 +3,10 @@
 - [Introduction](#introduction)
 - [Architecture](#architecture)
 - [Prerequisite](#prerequisite)
+- [Dockerizing Application](#dockerizing-application)
+  - [Developer environment setup](#developer-environment-setup)
+  - [Generate django project](#generate-django-project)
+  - [Replace the Django application's configuration file with system environment variables.](#replace-the-django-applications-configuration-file-with-system-environment-variables)
 - [Installation](#installation)
   - [PostgreSQL (For Ubuntu 20.04)](#postgresql-for-ubuntu-2004)
     - [Install](#install)
@@ -11,6 +15,12 @@
     - [Grant Database Access](#grant-database-access)
   - [Helm 3](#helm-3)
     - [Install](#install-1)
+    - [Plugins](#plugins)
+      - [helm-secrets](#helm-secrets)
+        - [introduction](#introduction-1)
+        - [install](#install-2)
+        - [Generate keypairs](#generate-keypairs)
+        - [設定環境變數](#設定環境變數)
   - [Kubernetes RBAC](#kubernetes-rbac)
     - [建立 Private Key](#建立-private-key)
     - [建立 CSR](#建立-csr)
@@ -22,6 +32,7 @@
       - [建立 RoleBinding](#建立-rolebinding)
       - [測試權限](#測試權限)
       - [部署各環境的 kubeconfig 至 Jenkins 中](#部署各環境的-kubeconfig-至-jenkins-中)
+- [Reference](#reference)
 
 
 # Introduction
@@ -51,9 +62,83 @@
 - Makefile ( Utilitys for image build、push、deploy )
 - PostgreSQL
 - Helm 3
+  - helm-secrets
 - Kubernetes Cluster
   - Jenkins User
 - Docker hub account
+- Dockerizing Application
+
+# Dockerizing Application
+
+## Developer environment setup
+```shell
+pip install virtualenv
+virtualenv venv
+source venv/bin/activate
+```
+
+## Generate django project
+```shell
+pip install django
+django-admin startproject app
+```
+
+## Replace the Django application's configuration file with system environment variables.
+```python
+# 引用以下這些Library
+import os
+import json
+import logging
+
+# 將以下配置項修改成讀取『環境變數』的方式
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+DEBUG = os.getenv('DJANGO_DEBUG_MODE', False)
+
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
+
+DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(os.getenv('DATABASE_ENGINE')),
+         'NAME':     os.getenv('DATABASE_NAME'),
+         'USER':     os.getenv('DATABASE_USERNAME'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+         'HOST':     os.getenv('DATABASE_HOST'),
+         'PORT':     os.getenv('DATABASE_PORT'),
+         'OPTIONS': json.loads(os.getenv('DATABASE_OPTIONS', '{}')),
+     }
+ }
+
+
+# 新增以下配置
+LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        '': {
+            'level': LOGLEVEL,
+            'handlers': ['console',],
+        },
+    },
+})
+
+```
+因在Kubernetes中 , 我們也能夠將 secret 或者是 configmap 等方式注入到 Pod 內系統環境變數中 , 而 Django 也可以透過 os.getenv() 方法取得系統環境變數 , 透過這樣的方式取得實際配置 , 將配置內容與程式碼分離 , 相較於將DB資訊或 SECRET_KEY 等等機敏資訊直接儲存在 Code 裏面 , 還是透過這種分離的方式較為安全。
+
+
 
 
 # Installation
@@ -143,6 +228,95 @@ $ bash ./get-helm-3
 
 # 驗證helm二進制文件可以執行 , 顯示對應版本
 $ helm version
+```
+
+### Plugins
+
+#### helm-secrets
+
+##### introduction
+在使用Helm 部署應用程序時，我們經常會遇到需要為所要部署的應用程序設定敏感信息值的情況，像是為應用程序自身設定登錄名稱或密碼訊息、設定應用程序連接資料庫所需資訊等等。
+
+若將這些包含了敏感信息的值直接以明文的方式存儲在自定義的 Helm Values 文件中，當使用如 Git 等代碼版本控制工具追踪 Values 文件時，將會帶來非常大的安全隱患。
+
+因此我們通常不會將這些敏感資訊保存在 Values 文件中 , 而是透過部署過程中，透過 Helm命令的 `--set` 參數 , 已命令行的方式設定變數值 
+
+但使用這種方式同樣也有它自身的局限性：
+
+- 首先，如果要設定的敏感字段過多，則在命令行中需要指定的參數就越多，這將使得命令行過於冗長且容易出錯，同時部署人員需要記住的部署參數也變得複雜起來；
+- 其次，通過查看系統執行過的命令歷史記錄，同樣能夠獲取到在執行 HELM 命令時所有指定的敏感信息參數，這在一定程度上同樣存在安全隱患。
+
+而本文將介紹另一種相對來說比較完美的解決方案：利用 Helm 的 secrets 插件，將這些包含了敏感信息的值通過某種加密手段加密之後，在保存到 Values 文件中去。
+
+helm-secrets 插件可以幫助我們將定義在 values.yaml 文件中的值進行加密之後重新存儲到 Values 文件中，被加密後的 Values 文件可以被隨意分發、存儲到代碼版本管理工具中而不用擔心敏感信息被暴露。
+
+##### install
+
+在使用 helm-secrets 插件之前，首先確保該插件被安裝到了本地 HELM 中，安裝 HELM 插件非常簡單，使用下面命令直接進行安裝即可：
+
+```shell
+$ helm plugin install https://github.com/futuresimple/helm-secrets
+
+# 如果系統是 arm64 Ubuntut , 則需要加入 dpkg --add-architecture arm64
+```
+
+```shell
+$ helm plugin list
+NAME       VERSION    DESCRIPTION
+secrets    2.0.2      This plugin provides secrets values encryption for Helm charts secure storing
+```
+
+helm-secrets 插件是通過調用 SOPS 命令來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。
+
+此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
+
+```bash
+# Ubuntu，Debian 用户
+$ sudo apt install gnupg
+
+# CentOS，Fedora，RHEL 用户
+$ sudo yum install gnupg
+
+# MacOS 用户
+$ brew install gnupg
+```
+
+GPG 同樣也使用了公鑰和私鑰的概念實現了非對稱加密算法。簡單來說：公鑰用於加密，擁有公鑰的人可以且僅僅可以進行加密操作，它可以分發給任何組織或個人；而私鑰則用於解密，且僅能用於解密那些由該私鑰與之配對的公鑰加密的信息，任何擁有私鑰的人都可以進行解密操作，因此，確保私鑰不被洩漏對安全性起著至關重要的作用。
+
+
+##### Generate keypairs
+
+在使用 gpg 命令進行加密解密之前，首先需要生成 GPG 公鑰和私鑰。
+
+```shell
+$ gpg --batch --generate-key << EOF
+%echo Generating a basic OpenPGP key for HELM Secret
+Key-Type: RSA
+Key-Length: 4096
+Subkey-Type: RSA
+Subkey-Length: 4096
+Name-Real: HELM Secret
+Name-Comment: Used for HELM Secret Plugin
+Name-Email: helm-secret@email.com
+Expire-Date: 0
+%no-ask-passphrase
+%no-protection
+%commit
+%echo done
+EOF
+
+```
+該命令將會為我們生成一對長度為 4096 且永不過期的 RSA 密鑰對，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
+
+當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
+在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。
+
+
+##### 設定環境變數
+
+如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息，那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息，因此我們可以將密鑰對 ID 指定給該環境變數：
+```shell
+$ export SOPS_PGP_FP=00E0160999E3C663
 ```
 
 
@@ -370,3 +544,9 @@ No resources found in devops namespace.
 在 Jenkins 中加入 Crediential , 種類選擇 Secret file , 實際檔案就是我們產生的 jenkins-kubeconfig.yaml , id & desciption 可以加上環境以便區分。
 
 
+
+
+
+# Reference
+
+https://segmentfault.com/a/1190000040199249
