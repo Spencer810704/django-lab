@@ -36,7 +36,7 @@
 
 
 # Introduction
-該專案目前用於自學如何使用 Jenkins pipeline 透過 Helm3 部署 Kubernetes Application
+該專案目前用於自學如何使用 Jenkins pipeline 透過 Helm3 部署 Kubernetes Application ( still ongoing )
 
 
 # Architecture
