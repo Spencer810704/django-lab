@@ -21,7 +21,7 @@
       - [建立 ClusterRole](#建立-clusterrole)
       - [建立 RoleBinding](#建立-rolebinding)
       - [測試權限](#測試權限)
-      - [部署 kubeconfig 至 Jenkins 中](#部署-kubeconfig-至-jenkins-中)
+      - [部署各環境的 kubeconfig 至 Jenkins 中](#部署各環境的-kubeconfig-至-jenkins-中)
 
 
 # Introduction
@@ -31,7 +31,7 @@
 # Architecture
 
 
-![](Architecture.jpg)
+![](doc/Architecture.jpg)
 說明:
 1. 開發人員 Push Code 至 Gitlab
 2. 建立各環境 Jenkins Job (SIT / STG / PROD)
@@ -40,7 +40,7 @@
    - 使用不同的 kubeconfig 並透過 Helm3 管理對應環境的 namespace
 4. 因考慮到較少公司直接將 DB 使用Container , 故還是使用 VM , 透過自定義 EndPoints , 讓內部容器與DB連線
 
-![](Architecture1.jpg)
+![](doc/Architecture1.jpg)
 說明:
 1. 依據 git commit tag 作為 container tag 並 push 至 docker hub 
 2. 由 Helm3 管理 Kubernetes Cluster , 拉取指定的 commit tag
@@ -363,9 +363,9 @@ $ kubectl get pods -n sit --kubeconfig sit-jenkins-kubeconfig.yml
 No resources found in devops namespace.
 ```
 
-#### 部署 kubeconfig 至 Jenkins 中
+#### 部署各環境的 kubeconfig 至 Jenkins 中
 
-![](jenkins_credentials.jpg)
+![](doc/jenkins_credentials.jpg)
 
 在 Jenkins 中加入 Crediential , 種類選擇 Secret file , 實際檔案就是我們產生的 jenkins-kubeconfig.yaml , id & desciption 可以加上環境以便區分。
 
