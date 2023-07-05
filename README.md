@@ -1,8 +1,8 @@
 
 目錄
 - [Introduction](#introduction)
-- [Architecture](#architecture)
 - [Prerequisite](#prerequisite)
+- [Architecture](#architecture)
 - [Dockerizing Application](#dockerizing-application)
   - [Developer environment setup](#developer-environment-setup)
   - [Generate django project](#generate-django-project)
@@ -39,6 +39,18 @@
 該專案目前用於自學如何使用 Jenkins pipeline 透過 Helm3 部署 Kubernetes Application ( still ongoing )
 
 
+# Prerequisite
+- Jenkins ( Use Jenkins pipeline )
+- Makefile ( Utilitys for image build、push、deploy )
+- PostgreSQL
+- Helm 3
+  - helm-secrets
+- Kubernetes Cluster
+  - Jenkins User
+- Docker hub account
+- Dockerizing Application
+
+
 # Architecture
 
 
@@ -56,17 +68,6 @@
 1. 依據 git commit tag 作為 container tag 並 push 至 docker hub 
 2. 由 Helm3 管理 Kubernetes Cluster , 拉取指定的 commit tag
 
-
-# Prerequisite
-- Jenkins ( Use Jenkins pipeline )
-- Makefile ( Utilitys for image build、push、deploy )
-- PostgreSQL
-- Helm 3
-  - helm-secrets
-- Kubernetes Cluster
-  - Jenkins User
-- Docker hub account
-- Dockerizing Application
 
 # Dockerizing Application
 
