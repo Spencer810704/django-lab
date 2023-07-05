@@ -244,7 +244,7 @@ ClusterRole
 | --- | --- | --- | --- |
 | jenkins-deploy | * | * | "" |
 |  | * | * | apps |
-|  |  |  |  |
+
 
 RoleBinding
 
