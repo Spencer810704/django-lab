@@ -9,6 +9,12 @@
     - [Settings](#settings)
     - [Create Database User](#create-database-user)
     - [Grant Database Access](#grant-database-access)
+  - [Helm 3](#helm-3)
+    - [Install](#install-1)
+    - [Settings](#settings-1)
+  - [Helm 3](#helm-3-1)
+    - [Install](#install-2)
+    - [Settings](#settings-2)
 
 
 # Introduction
@@ -38,6 +44,7 @@
 - PostgreSQL
 - Helm 3
 - Kubernetes Cluster
+  - Jenkins User
 - Docker hub account
 
 
@@ -114,3 +121,34 @@ GRANT
 
 
 ```
+
+
+## Helm 3
+
+### Install
+```shell
+# 下載安裝腳本
+$ curl -O https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+
+# 安裝
+$ bash ./get-helm-3
+
+# 驗證helm二進制文件可以執行 , 顯示對應版本
+$ helm version
+```
+
+
+### Settings
+
+## Helm 3
+
+### Install
+
+### Settings
+
+
+
+
+
+
+
