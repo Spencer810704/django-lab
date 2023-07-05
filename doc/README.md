@@ -21,6 +21,7 @@
       - [建立 ClusterRole](#建立-clusterrole)
       - [建立 RoleBinding](#建立-rolebinding)
       - [測試權限](#測試權限)
+      - [部署 kubeconfig 至 Jenkins 中](#部署-kubeconfig-至-jenkins-中)
 
 
 # Introduction
@@ -240,6 +241,8 @@ Error from server (Forbidden): pods is forbidden: User "jenkins" cannot list res
 
 ClusterRole
 
+因每個環境的 Jenkins帳號的權限應當相同 , 故使用 ClusterRole Resource , 就不需要每個環境再新建立一個 Role , 只需要共用同一個 Role
+
 | ClusterRole | Resource | Verb | apiGroups |
 | --- | --- | --- | --- |
 | jenkins-deploy | * | * | "" |
@@ -359,5 +362,11 @@ yes
 $ kubectl get pods -n sit --kubeconfig sit-jenkins-kubeconfig.yml
 No resources found in devops namespace.
 ```
+
+#### 部署 kubeconfig 至 Jenkins 中
+
+![](jenkins_credentials.jpg)
+
+在 Jenkins 中加入 Crediential , 種類選擇 Secret file , 實際檔案就是我們產生的 jenkins-kubeconfig.yaml , id & desciption 可以加上環境以便區分。
 
 
