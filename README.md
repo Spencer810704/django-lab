@@ -340,7 +340,7 @@ sub   rsa4096 2020-04-24 [SEA]
 上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID , 
 
 
-如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數：
+如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數 , 讓 helm-secrets 知道使用哪一組密鑰對進行加密解密。
 
 ```shell
 $ export SOPS_PGP_FP=13D525EEF0A5FA38F4E78F7900E0160999E3C663
@@ -368,13 +368,13 @@ $ openssl genrsa -out prod-jenkins.key 2048
 ```bash
 # 建立每個環境 user 的 csr, (CN=<your env user name>)
 
-# SIT 環境
+# For SIT environment
 $ openssl req -new -key sit-jenkins.key -out sit-jenkins.csr -subj "/CN=sit-jenkins"
 
-# STG 環境
+# For STG environment
 $ openssl req -new -key stg-jenkins.key -out stg-jenkins.csr -subj "/CN=stg-jenkins"
 
-# PROD 環境
+# For PROD environment
 $ openssl req -new -key prod-jenkins.key -out prod-jenkins.csr -subj "/CN=prod-jenkins"
 ```
 
@@ -461,6 +461,8 @@ RoleBinding
 
 #### 建立 Namespace
 
+因使用同一組 kubernetes cluster , 並非每個環境架設一組 kubernetes cluster , 故使用 namespace 隔離開發環境、測試環境、生產環境等等。
+
 ```shell
 kubectl create namespace sit
 kubectl create namespace stg
@@ -468,6 +470,9 @@ kubectl create namespace prod
 ```
 
 #### 建立 ClusterRole
+
+建立 Cluster Role , 因為都是給 Jenkins 進行 CD , 每個環境應該要是相同的規則 , 故使用 ClusterRole 共用此 Role
+
 ```shell
 cat > jenkins_deploy_cluster_role.yaml << EOF
 ---
@@ -552,14 +557,13 @@ EOF
 #### 測試權限
 
 ```shell
-# 有兩種方法可以測試權限 ,
+# 有兩種方法可以測試權限
+
 # 1. 一種是用 kubectl auth can-i 方式測試 
-# 2. 另一種是用剛剛產生的 kubeconfig 進行測試
-
-
 $ kubectl auth can-i get pods -n sit --as sit-jenkins
 yes
 
+# 2. 另一種是用剛剛產生的 kubeconfig 進行測試
 $ kubectl get pods -n sit --kubeconfig sit-jenkins-kubeconfig.yml
 No resources found in devops namespace.
 ```
