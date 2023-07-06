@@ -22,18 +22,18 @@
         - [introduction](#introduction-1)
         - [install](#install-2)
         - [Generate keypairs](#generate-keypairs)
-        - [設定環境變數](#設定環境變數)
+        - [setup environment variable for SOPS](#setup-environment-variable-for-sops)
   - [Kubernetes RBAC](#kubernetes-rbac)
-    - [建立 Private Key](#建立-private-key)
-    - [建立 CSR](#建立-csr)
-    - [申請 Kubernetes 證書](#申請-kubernetes-證書)
-    - [建立 kubeconfig](#建立-kubeconfig)
-    - [Jenkins 的 RBAC 授權](#jenkins-的-rbac-授權)
-      - [建立 Namespace](#建立-namespace)
-      - [建立 ClusterRole](#建立-clusterrole)
-      - [建立 RoleBinding](#建立-rolebinding)
-      - [測試權限](#測試權限)
-      - [部署各環境的 kubeconfig 至 Jenkins 中](#部署各環境的-kubeconfig-至-jenkins-中)
+    - [Create Private Key](#create-private-key)
+    - [Create certificate signing request (CSR)](#create-certificate-signing-request-csr)
+    - [apply for Kubernetes certificate](#apply-for-kubernetes-certificate)
+    - [Create kubeconfig file](#create-kubeconfig-file)
+    - [Jenkins RBAC authorization](#jenkins-rbac-authorization)
+      - [Create Namespace](#create-namespace)
+      - [Create ClusterRole](#create-clusterrole)
+      - [Create RoleBinding](#create-rolebinding)
+      - [Test permission](#test-permission)
+      - [Deploy the kubeconfig for each environment to their respective environments.](#deploy-the-kubeconfig-for-each-environment-to-their-respective-environments)
 - [Reference](#reference)
 
 
@@ -323,7 +323,7 @@ EOF
 該命令將會為我們生成一對長度為 4096 且永不過期的 `RSA 密鑰對`，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
 
 
-##### 設定環境變數
+##### setup environment variable for SOPS
 
 當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
 在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。
@@ -350,7 +350,7 @@ $ export SOPS_PGP_FP=13D525EEF0A5FA38F4E78F7900E0160999E3C663
 
 ## Kubernetes RBAC
 
-### 建立 Private Key
+### Create Private Key
 
 ```bash
 # For SIT environment
@@ -363,7 +363,7 @@ $ openssl genrsa -out stg-jenkins.key 2048
 $ openssl genrsa -out prod-jenkins.key 2048
 ```
 
-### 建立 CSR
+### Create certificate signing request (CSR)
 
 ```bash
 # 建立每個環境 user 的 csr, (CN=<your env user name>)
@@ -378,7 +378,7 @@ $ openssl req -new -key stg-jenkins.key -out stg-jenkins.csr -subj "/CN=stg-jenk
 $ openssl req -new -key prod-jenkins.key -out prod-jenkins.csr -subj "/CN=prod-jenkins"
 ```
 
-### 申請 Kubernetes 證書
+### apply for Kubernetes certificate
 這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
 
 ```shell
@@ -422,7 +422,7 @@ $ kubectl get csr sit-jenkins-user -o jsonpath='{.status.certificate}' | base64 
 
 ```
 
-### 建立 kubeconfig
+### Create kubeconfig file
 
 這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
 
@@ -438,7 +438,7 @@ Error from server (Forbidden): pods is forbidden: User "jenkins" cannot list res
 
 ```
 
-###  Jenkins 的 RBAC 授權
+###  Jenkins RBAC authorization
 
 ClusterRole
 
@@ -459,7 +459,7 @@ RoleBinding
 | prod-jenkins | jenkins-deploy | prod |
 
 
-#### 建立 Namespace
+#### Create Namespace
 
 因使用同一組 kubernetes cluster , 並非每個環境架設一組 kubernetes cluster , 故使用 namespace 隔離開發環境、測試環境、生產環境等等。
 
@@ -469,7 +469,7 @@ kubectl create namespace stg
 kubectl create namespace prod
 ```
 
-#### 建立 ClusterRole
+#### Create ClusterRole
 
 建立 Cluster Role , 因為都是給 Jenkins 進行 CD , 每個環境應該要是相同的規則 , 故使用 ClusterRole 共用此 Role
 
@@ -490,7 +490,7 @@ rules:
 EOF
 ```
 
-#### 建立 RoleBinding
+#### Create RoleBinding
 
 SIT
 ```shell
@@ -554,7 +554,7 @@ EOF
 
 
 
-#### 測試權限
+#### Test permission
 
 ```shell
 # 有兩種方法可以測試權限
@@ -568,7 +568,7 @@ $ kubectl get pods -n sit --kubeconfig sit-jenkins-kubeconfig.yml
 No resources found in devops namespace.
 ```
 
-#### 部署各環境的 kubeconfig 至 Jenkins 中
+#### Deploy the kubeconfig for each environment to their respective environments.
 
 ![](doc/jenkins_credentials.jpg)
 
