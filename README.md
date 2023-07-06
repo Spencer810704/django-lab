@@ -1,5 +1,7 @@
 
-目錄
+# Table of contents
+
+- [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Prerequisite](#prerequisite)
 - [Architecture](#architecture)
@@ -41,12 +43,12 @@
 
 # Prerequisite
 - Jenkins ( Use Jenkins pipeline )
-- Makefile ( Utilitys for image build、push、deploy )
 - PostgreSQL
+- Makefile ( Utilitys for image build、push、deploy )
 - Helm 3
-  - helm-secrets
+  - plugins: helm-secrets
 - Kubernetes Cluster
-  - Jenkins User
+  - Jenkins User Account
 - Docker hub account
 - Dockerizing Application
 
@@ -56,11 +58,12 @@
 
 ![](doc/architecture.jpg)
 說明:
-1. 開發人員 Push Code 至 Gitlab
+1. 開發人員 push code 至 Gitlab , 而將最終要上線的 code merge 至 main branch
 2. 建立各環境 Jenkins Job (SIT / STG / PROD)
 3. 各環境 Jenkins Job 會做以下幾件事
+   - 拉 main branch 的 code 進行作業
    - 依據 git commit tag 作為 container tag 並 push 至 docker hub 
-   - 使用不同的 kubeconfig 並透過 Helm3 管理對應環境的 namespace
+   - 使用不同的 kubeconfig 透過 Helm3 管理對應環境 namespace 內的 deployments
 4. 因考慮到較少公司直接將 DB 使用Container , 故還是使用 VM , 透過自定義 EndPoints , 讓內部容器與DB連線
 
 ![](doc/architecture1.jpg)
@@ -72,6 +75,9 @@
 # Dockerizing Application
 
 ## Developer environment setup
+
+開發環境設置 , 設定專案虛擬環境 , 避免使用到本機中的 Python 
+
 ```shell
 pip install virtualenv
 virtualenv venv
@@ -79,12 +85,18 @@ source venv/bin/activate
 ```
 
 ## Generate django project
+
+安裝 django 套件以及建立專案
+
 ```shell
 pip install django
 django-admin startproject app
 ```
 
 ## Replace the Django application's configuration file with system environment variables.
+
+在Kubernetes中 , 我們能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內的系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過此種方式取得實際配置項目值 , 達到配置內容與程式碼分離 , 相較於直接將 DB連線資訊或 SECRET_KEY 等等機敏資訊寫死在 settings.py 並儲存在 Code 裏面 , 個人覺得還是透過這種分離的方式較為安全 , 但較為麻煩且不易管理(需要另外管理secret or config)，而下面會提到使用 helm-secret 將機敏資訊儲存至版本控制倉庫的方式 , 能夠同時兼顧安全以及管理。
+
 ```python
 # 引用以下這些Library
 import os
@@ -137,9 +149,6 @@ logging.config.dictConfig({
 })
 
 ```
-因在Kubernetes中 , 我們也能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過這樣的方式取得實際配置 , 將配置內容與程式碼分離 , 相較於將DB資訊或 SECRET_KEY 等等機敏資訊直接儲存在 Code 裏面 , 還是透過這種分離的方式較為安全。
-
-
 
 
 # Installation
@@ -147,6 +156,9 @@ logging.config.dictConfig({
 ## PostgreSQL (For Ubuntu 20.04)
 
 ### Install 
+
+PostgreSQL 安裝
+
 ```shell
 sudo apt update
 sudo apt install postgresql postgresql-contrib
@@ -154,6 +166,8 @@ sudo systemctl enable postgresql.service --now
 ```
 
 ### Settings
+
+修改 PostgreSQL 配置 (hba、listen address)
 
 ```shell
 # 修改主配置檔
@@ -174,6 +188,8 @@ sudo systemctl restart postgresql.service
 
 ### Create Database User
 
+建立給專案使用的 db account
+
 ```shell
 
 # 切換用戶名稱
@@ -193,6 +209,8 @@ CREATE ROLE
 ```
 
 ### Grant Database Access
+
+賦予專案用的 db user 存取相應 db 的所有權限 (ALL PRIVILEGES)
 
 ```shell
 root@postgresql:~# su - postgres
@@ -220,6 +238,9 @@ GRANT
 ## Helm 3
 
 ### Install
+
+Helm 安裝
+
 ```shell
 # 下載安裝腳本
 $ curl -O https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
@@ -236,40 +257,32 @@ $ helm version
 #### helm-secrets
 
 ##### introduction
-在使用Helm 部署應用程序時，我們經常會遇到需要為所要部署的應用程序設定敏感信息值的情況，像是為應用程序自身設定登錄名稱或密碼訊息、設定應用程序連接資料庫所需資訊等等。
-
-若將這些包含了敏感信息的值直接以明文的方式存儲在自定義的 Helm Values 文件中，當使用如 Git 等代碼版本控制工具追踪 Values 文件時，將會帶來非常大的安全隱患。
-
-因此我們通常不會將這些敏感資訊保存在 Values 文件中 , 而是透過部署過程中，透過 Helm命令的 `--set` 參數 , 已命令行的方式設定變數值 
+在使用Helm 部署應用程序時，我們經常會遇到需要為所要部署的應用程序設定敏感信息值的情況，像是為應用程序自身設定登錄名稱或密碼訊息、設定應用程序連接資料庫所需資訊等等。**若將這些包含了敏感信息的值直接以明文的方式存儲在自定義的 Helm Values 文件中，當使用如 Git 等代碼版本控制工具追踪 Values 文件時，將會帶來非常大的安全隱患**。因此我們通常不會將這些敏感資訊保存在 Values 文件中 , 而是透過部署過程中，透過 Helm命令的 `--set` 參數 , 已命令行的方式設定變數值 
 
 但使用這種方式同樣也有它自身的局限性：
-
 - 首先，如果要設定的敏感字段過多，則在命令行中需要指定的參數就越多，這將使得命令行過於冗長且容易出錯，同時部署人員需要記住的部署參數也變得複雜起來；
 - 其次，通過查看系統執行過的命令歷史記錄，同樣能夠獲取到在執行 HELM 命令時所有指定的敏感信息參數，這在一定程度上同樣存在安全隱患。
 
-而本文將介紹另一種相對來說比較完美的解決方案：利用 Helm 的 secrets 插件，將這些包含了敏感信息的值通過某種加密手段加密之後，在保存到 Values 文件中去。
-
-helm-secrets 插件可以幫助我們將定義在 values.yaml 文件中的值進行加密之後重新存儲到 Values 文件中，被加密後的 Values 文件可以被隨意分發、存儲到代碼版本管理工具中而不用擔心敏感信息被暴露。
+而這裡將介紹另一種相對來說比較完美的解決方案：利用 Helm 的 secrets 插件，將這些包含了敏感信息的值通過某種加密手段加密之後，在保存到 Values 文件中去。helm-secrets 插件可以幫助我們將定義在 values.yaml 文件中的值進行加密之後重新存儲到 Values 文件中，被加密後的 Values 文件可以被隨意分發、存儲到代碼版本管理工具中而不用擔心敏感信息被暴露。
 
 ##### install
 
 在使用 helm-secrets 插件之前，首先確保該插件被安裝到了本地 HELM 中，安裝 HELM 插件非常簡單，使用下面命令直接進行安裝即可：
 
 ```shell
+# 安裝 helm-secrets
 $ helm plugin install https://github.com/futuresimple/helm-secrets
 
-# 如果系統是 arm64 Ubuntut , 則需要加入 dpkg --add-architecture arm64
-```
+# 如果系統是 arm64 Ubuntut , 則需要執行 dpkg --add-architecture arm64
 
-```shell
+# 確認 plugin 已經被安裝
 $ helm plugin list
 NAME       VERSION    DESCRIPTION
 secrets    2.0.2      This plugin provides secrets values encryption for Helm charts secure storing
 ```
 
-helm-secrets 插件是通過調用 SOPS 命令來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。
 
-此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
+helm-secrets 插件是通過調用 SOPS 命令來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
 
 ```bash
 # Ubuntu，Debian 用户
@@ -282,12 +295,12 @@ $ sudo yum install gnupg
 $ brew install gnupg
 ```
 
-GPG 同樣也使用了公鑰和私鑰的概念實現了非對稱加密算法。簡單來說：公鑰用於加密，擁有公鑰的人可以且僅僅可以進行加密操作，它可以分發給任何組織或個人；而私鑰則用於解密，且僅能用於解密那些由該私鑰與之配對的公鑰加密的信息，任何擁有私鑰的人都可以進行解密操作，因此，確保私鑰不被洩漏對安全性起著至關重要的作用。
-
 
 ##### Generate keypairs
 
-在使用 gpg 命令進行加密解密之前，首先需要生成 GPG 公鑰和私鑰。
+GPG 同樣也使用了公鑰和私鑰的概念實現了非對稱加密算法。簡單來說：公鑰用於加密，擁有公鑰的人可以且僅僅可以進行加密操作，它可以分發給任何組織或個人；而私鑰則用於解密，且僅能用於解密那些由該私鑰與之配對的公鑰加密的信息，任何擁有私鑰的人都可以進行解密操作，因此，確保私鑰不被洩漏對安全性起著至關重要的作用。
+
+**在使用 gpg 命令進行加密解密之前，首先需要生成 GPG 公鑰和私鑰**。
 
 ```shell
 $ gpg --batch --generate-key << EOF
@@ -307,17 +320,26 @@ Expire-Date: 0
 EOF
 
 ```
-該命令將會為我們生成一對長度為 4096 且永不過期的 RSA 密鑰對，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
-
-當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
-在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。
+該命令將會為我們生成一對長度為 4096 且永不過期的 `RSA 密鑰對`，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
 
 
 ##### 設定環境變數
 
-如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息，那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息，因此我們可以將密鑰對 ID 指定給該環境變數：
+當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
+在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。
+
 ```shell
-$ export SOPS_PGP_FP=00E0160999E3C663
+$ gpg --list-key
+
+pub   rsa4096 2020-04-24 [SCEA]
+      13D525EEF0A5FA38F4E78F7900E0160999E3C663
+uid           [ultimate] HELM Secret (Used for HELM Secret Plugin) <helm-secret@email.com>
+sub   rsa4096 2020-04-24 [SEA]
+```
+
+上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID , 如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數：
+```shell
+$ export SOPS_PGP_FP=13D525EEF0A5FA38F4E78F7900E0160999E3C663
 ```
 
 
