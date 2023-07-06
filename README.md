@@ -282,7 +282,7 @@ secrets    2.0.2      This plugin provides secrets values encryption for Helm ch
 ```
 
 
-helm-secrets 插件是通過調用 SOPS 命令來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
+helm-secrets 插件是通過調用 `SOPS 命令`來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
 
 ```bash
 # Ubuntu，Debian 用户
@@ -337,7 +337,11 @@ uid           [ultimate] HELM Secret (Used for HELM Secret Plugin) <helm-secret@
 sub   rsa4096 2020-04-24 [SEA]
 ```
 
-上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID , 如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數：
+上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID , 
+
+
+如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數：
+
 ```shell
 $ export SOPS_PGP_FP=13D525EEF0A5FA38F4E78F7900E0160999E3C663
 ```
