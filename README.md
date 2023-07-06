@@ -1,6 +1,7 @@
 
-# 目錄
-- [目錄](#目錄)
+# Table of contents
+
+- [Table of contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Prerequisite](#prerequisite)
 - [Architecture](#architecture)
