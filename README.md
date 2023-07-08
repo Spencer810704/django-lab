@@ -75,6 +75,9 @@
 1. 依據 git commit tag 作為 container tag 並 push 至 docker hub 
 2. 由 Helm3 管理 Kubernetes Cluster , 拉取指定的 commit tag
 
+<br>
+<br>
+
 
 # Dockerizing Application
 
