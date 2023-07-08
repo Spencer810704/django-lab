@@ -70,6 +70,10 @@
    - 使用不同的 kubeconfig 透過 Helm3 管理對應環境 namespace 內的 deployments
 4. 因考慮到較少公司直接將 DB 使用Container , 故還是使用 VM , 透過自定義 EndPoints , 讓內部容器與DB連線
 
+<br>
+<br>
+
+
 ![](doc/architecture1.jpg)
 說明:
 1. 依據 git commit tag 作為 container tag 並 push 至 docker hub 
