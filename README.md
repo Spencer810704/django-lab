@@ -419,6 +419,10 @@ $ openssl genrsa -out stg-jenkins.key 2048
 $ openssl genrsa -out prod-jenkins.key 2048
 ```
 
+說明: 建立每個環境的 jenkins user key pairs
+<br>
+<br>
+
 ### Create certificate signing request (CSR)
 
 ```bash
@@ -434,8 +438,12 @@ $ openssl req -new -key stg-jenkins.key -out stg-jenkins.csr -subj "/CN=stg-jenk
 $ openssl req -new -key prod-jenkins.key -out prod-jenkins.csr -subj "/CN=prod-jenkins"
 ```
 
+說明: 建立每個環境User的CSR
+
+<br>
+<br>
+
 ### apply for Kubernetes certificate
-這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
 
 ```shell
 # 先取得 CSR 的內容 , 而內容需要由base64進行encode , 且不能有斷行 , 所以要加上參數-w 0（CSR可以看作是證書申請文件)
@@ -478,9 +486,13 @@ $ kubectl get csr sit-jenkins-user -o jsonpath='{.status.certificate}' | base64 
 
 ```
 
+說明: 這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
+
+<br>
+<br>
+
 ### Create kubeconfig file
 
-這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
 
 ```shell
 $ kubectl config --kubeconfig=sit-jenkins-kubeconfig.yml set-cluster kubernetes --server https://10.211.55.11:6443 --insecure-skip-tls-verify
@@ -493,18 +505,24 @@ $ kubectl get pods -n devops --kubeconfig jenkins-kubeconfig.yml
 Error from server (Forbidden): pods is forbidden: User "jenkins" cannot list resource "pods" in API group "" in the namespace "devops"
 
 ```
+說明: 這邊先用SIT環境作為範例 , 其餘STG以及PROD方法相同
+
+<br>
+<br>
 
 ###  Jenkins RBAC authorization
 
 ClusterRole
-
-因每個環境的 Jenkins帳號的權限應當相同 , 故使用 ClusterRole Resource , 就不需要每個環境再新建立一個 Role , 只需要共用同一個 Role
 
 | ClusterRole | Resource | Verb | apiGroups |
 | --- | --- | --- | --- |
 | jenkins-deploy | * | * | "" |
 |  | * | * | apps |
 
+說明: 因每個環境的 Jenkins帳號的權限應當相同 , 故使用 ClusterRole Resource , 就不需要每個環境再新建立一個 Role , 只需要使用 ClusterRole 就能讓全部環境共用這個角色
+
+<br>
+<br>
 
 RoleBinding
 
@@ -517,17 +535,20 @@ RoleBinding
 
 #### Create Namespace
 
-因使用同一組 kubernetes cluster , 並非每個環境架設一組 kubernetes cluster , 故使用 namespace 隔離開發環境、測試環境、生產環境等等。
+
 
 ```shell
 kubectl create namespace sit
 kubectl create namespace stg
 kubectl create namespace prod
 ```
+說明: 因使用同一組 kubernetes cluster , 並非每個環境架設一組 kubernetes cluster , 故使用 namespace 隔離開發環境、測試環境、生產環境等等。
+
+<br>
+<br>
 
 #### Create ClusterRole
 
-建立 Cluster Role , 因為都是給 Jenkins 進行 CD , 每個環境應該要是相同的規則 , 故使用 ClusterRole 共用此 Role
 
 ```shell
 cat > jenkins_deploy_cluster_role.yaml << EOF
@@ -545,6 +566,12 @@ rules:
     verbs: ["*"]
 EOF
 ```
+
+說明: 建立 Cluster Role , 因為都是給 Jenkins 進行 CD , 每個環境應該要是相同的規則 , 故使用 ClusterRole 共用此 Role
+
+<br>
+<br>
+
 
 #### Create RoleBinding
 
@@ -609,6 +636,11 @@ EOF
 ```
 
 
+說明:  使用 RoleBinding 去限制只能用戶操作自己環境的 namespace , 避免權限過大互相影響。
+
+<br>
+<br>
+
 
 #### Test permission
 
@@ -623,6 +655,11 @@ yes
 $ kubectl get pods -n sit --kubeconfig sit-jenkins-kubeconfig.yml
 No resources found in devops namespace.
 ```
+
+說明: 測試權限
+<br>
+<br>
+
 
 #### Deploy the kubeconfig for each environment to their respective environments.
 
