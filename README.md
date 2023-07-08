@@ -221,8 +221,6 @@ sudo systemctl restart postgresql.service
 
 ### Create Database User
 
-建立給專案使用的 db account
-
 ```shell
 
 # 切換用戶名稱
@@ -240,12 +238,14 @@ postgres=# CREATE USER django_lab WITH PASSWORD 'django_lab';
 CREATE ROLE
 
 ```
+
+說明: 建立給專案使用的 db account
 <br>
 
 
 ### Grant Database Access
 
-賦予專案用的 db user 存取相應 db 的所有權限 (ALL PRIVILEGES)
+
 
 ```shell
 root@postgresql:~# su - postgres
@@ -267,14 +267,13 @@ postgres=# GRANT ALL PRIVILEGES ON DATABASE django_lab TO django_lab;
 GRANT
 ```
 
+說明: 賦予專案用的 db user 存取相應 db 的所有權限 (ALL PRIVILEGES)
 <br>
 
 
 ## Helm 3
 
 ### Install
-
-Helm 安裝
 
 ```shell
 # 下載安裝腳本
@@ -286,6 +285,10 @@ $ bash ./get-helm-3
 # 驗證helm二進制文件可以執行 , 顯示對應版本
 $ helm version
 ```
+
+說明: Helm 安裝
+<br>
+
 
 ### Plugins
 
