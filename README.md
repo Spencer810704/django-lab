@@ -240,12 +240,11 @@ CREATE ROLE
 ```
 
 說明: 建立給專案使用的 db account
+
 <br>
 
 
 ### Grant Database Access
-
-
 
 ```shell
 root@postgresql:~# su - postgres
@@ -268,8 +267,8 @@ GRANT
 ```
 
 說明: 賦予專案用的 db user 存取相應 db 的所有權限 (ALL PRIVILEGES)
-<br>
 
+<br>
 
 ## Helm 3
 
