@@ -99,6 +99,9 @@ virtualenv venv
 source venv/bin/activate
 ```
 
+<br>
+<br>
+
 ## Generate django project
 
 安裝 django 套件以及建立專案
@@ -107,6 +110,7 @@ source venv/bin/activate
 pip install django
 django-admin startproject app
 ```
+<br>
 <br>
 
 ## Replace the Django application's configuration file with system environment variables.
