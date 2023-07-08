@@ -191,7 +191,7 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl enable postgresql.service --now
 ```
 
-PostgreSQL 安裝步驟 (for Ubuntu)
+說明: PostgreSQL 安裝步驟 (for Ubuntu)
 
 <br>
 
@@ -215,7 +215,7 @@ host    all             all             0.0.0.0/0               md5
 sudo systemctl restart postgresql.service
 ```
 
-修改 PostgreSQL 配置 (hba、listen address)
+說明: 修改 PostgreSQL 配置 (hba、listen address)
 
 <br>
 
