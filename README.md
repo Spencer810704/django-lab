@@ -5,10 +5,6 @@
 - [Introduction](#introduction)
 - [Prerequisite](#prerequisite)
 - [Architecture](#architecture)
-- [Dockerizing Application](#dockerizing-application)
-  - [Developer environment setup](#developer-environment-setup)
-  - [Generate django project](#generate-django-project)
-  - [Replace the application's configuration file with system environment variables.](#replace-the-applications-configuration-file-with-system-environment-variables)
 - [Installation](#installation)
   - [PostgreSQL (For Ubuntu 20.04)](#postgresql-for-ubuntu-2004)
     - [Install](#install)
@@ -34,6 +30,13 @@
       - [Create RoleBinding](#create-rolebinding)
       - [Test permission](#test-permission)
       - [Deploy the kubeconfig for each environment to their respective environments.](#deploy-the-kubeconfig-for-each-environment-to-their-respective-environments)
+- [Code](#code)
+  - [Dockerizing Application](#dockerizing-application)
+    - [Developer environment setup](#developer-environment-setup)
+    - [Generate django project](#generate-django-project)
+    - [Replace the application's configuration file with system environment variables.](#replace-the-applications-configuration-file-with-system-environment-variables)
+  - [Makefile](#makefile)
+  - [Jenkinsfile (Piepline)](#jenkinsfile-piepline)
 - [Reference](#reference)
 
 
@@ -83,96 +86,6 @@
 <br>
 
 
-# Dockerizing Application
-
-<br>
-<br>
-
-
-## Developer environment setup
-
-開發環境設置 , 設定專案虛擬環境 , 避免使用到本機中的 Python 
-
-```shell
-pip install virtualenv
-virtualenv venv
-source venv/bin/activate
-```
-
-<br>
-<br>
-
-## Generate django project
-
-安裝 django 套件以及建立專案
-
-```shell
-pip install django
-django-admin startproject app
-```
-<br>
-<br>
-
-## Replace the application's configuration file with system environment variables.
-
-在Kubernetes中 , 我們能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內的系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過此種方式取得實際配置項目值 , 達到配置內容與程式碼分離 , 相較於直接將 DB連線資訊或 SECRET_KEY 等等機敏資訊寫死在 settings.py 並儲存在 Code 裏面 , 個人覺得還是透過這種分離的方式較為安全 , 但較為麻煩且不易管理(需要另外管理secret or config)，而下面會提到使用 helm-secret 將機敏資訊儲存至版本控制倉庫的方式 , 能夠同時兼顧安全以及管理。
-<br>
-<br>
-
-```python
-# 引用以下這些Library
-import os
-import json
-import logging
-
-# 將以下配置項修改成讀取『環境變數』的方式
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-
-DEBUG = os.getenv('DJANGO_DEBUG_MODE', False)
-
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
-
-DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.{}'.format(os.getenv('DATABASE_ENGINE')),
-         'NAME':     os.getenv('DATABASE_NAME'),
-         'USER':     os.getenv('DATABASE_USERNAME'),
-         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
-         'HOST':     os.getenv('DATABASE_HOST'),
-         'PORT':     os.getenv('DATABASE_PORT'),
-         'OPTIONS': json.loads(os.getenv('DATABASE_OPTIONS', '{}')),
-     }
- }
-
-
-# 新增以下配置
-LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
-
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
-        },
-    },
-    'loggers': {
-        '': {
-            'level': LOGLEVEL,
-            'handlers': ['console',],
-        },
-    },
-})
-
-```
-<br>
-<br>
 
 
 # Installation
@@ -667,6 +580,310 @@ No resources found in devops namespace.
 
 在 Jenkins 中加入 Crediential , 種類選擇 Secret file , 實際檔案就是我們產生的 jenkins-kubeconfig.yaml , id & desciption 可以加上環境以便區分。
 
+
+
+# Code
+
+<br>
+
+## Dockerizing Application
+
+<br>
+<br>
+
+
+### Developer environment setup
+
+開發環境設置 , 設定專案虛擬環境 , 避免使用到本機中的 Python 
+
+```shell
+pip install virtualenv
+virtualenv venv
+source venv/bin/activate
+```
+
+<br>
+<br>
+
+### Generate django project
+
+安裝 django 套件以及建立專案
+
+```shell
+pip install django
+django-admin startproject app
+```
+<br>
+<br>
+
+### Replace the application's configuration file with system environment variables.
+
+在Kubernetes中 , 我們能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內的系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過此種方式取得實際配置項目值 , 達到配置內容與程式碼分離 , 相較於直接將 DB連線資訊或 SECRET_KEY 等等機敏資訊寫死在 settings.py 並儲存在 Code 裏面 , 個人覺得還是透過這種分離的方式較為安全 , 但較為麻煩且不易管理(需要另外管理secret or config)，而下面會提到使用 helm-secret 將機敏資訊儲存至版本控制倉庫的方式 , 能夠同時兼顧安全以及管理。
+<br>
+<br>
+
+```python
+# 引用以下這些Library
+import os
+import json
+import logging
+
+# 將以下配置項修改成讀取『環境變數』的方式
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
+DEBUG = os.getenv('DJANGO_DEBUG_MODE', False)
+
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
+
+DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(os.getenv('DATABASE_ENGINE')),
+         'NAME':     os.getenv('DATABASE_NAME'),
+         'USER':     os.getenv('DATABASE_USERNAME'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+         'HOST':     os.getenv('DATABASE_HOST'),
+         'PORT':     os.getenv('DATABASE_PORT'),
+         'OPTIONS': json.loads(os.getenv('DATABASE_OPTIONS', '{}')),
+     }
+ }
+
+
+# 新增以下配置
+LOGLEVEL = os.getenv('DJANGO_LOGLEVEL', 'info').upper()
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+        },
+    },
+    'loggers': {
+        '': {
+            'level': LOGLEVEL,
+            'handlers': ['console',],
+        },
+    },
+})
+
+```
+<br>
+<br>
+
+
+## Makefile
+
+```makefile
+# Dockerfile 檔案名稱
+DOCKERFILE=Dockerfile
+
+# 根據專案名稱做修改
+IMAGE_NAME=django-lab
+
+# 目標Imag名稱 (格式：docker_registry_url/account_name/your_image_name:your_image_tag)
+TARGET_IMAGE_NAME=$(DOCKER_REGISTRY_URL)/$(DOCKER_REGISTRY_USERNAME)/$(IMAGE_NAME):$(IMAGE_TAG)
+
+# Build image (直接在Build的時候打Tag)
+build:
+	docker build -t $(TARGET_IMAGE_NAME) -f $(DOCKERFILE) .
+
+# 登入 & Push Image
+push:
+	echo $(DOCKER_REGISTRY_PASSWORD) | docker login $(DOCKER_REGISTRY_URL) -u $(DOCKER_REGISTRY_CREDENTIALS_USR) --password-stdin
+	docker push $(TARGET_IMAGE_NAME) 
+
+# 部署至 Kubernetes
+deploy:
+	kubectl --kubeconfig=$(KUBECONFIG) apply -f deployment.yaml --image $(TARGET_IMAGE_NAME)
+```
+說明: 
+
+<br>
+<br>
+
+## Jenkinsfile (Piepline)
+
+```groovy
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: "5"))           // 建置紀錄只保留5份
+        gitLabConnection('gitlab')                              // 設置 Gitlab Connection , 用於回寫建置狀態回Gitlab Pipeline (Pending、Success、Failed) , 
+                                                                // 注意：需要在 『管理 Jenkins』-> 『設定系統』->『Gitlab』-> 把 『Enable authentication for '/project' end-point』選項取消 , 否則會回寫失敗 , 出現403錯誤
+                                                                // 為什麼造成這個原因目前還沒特別去查
+    }
+    triggers {
+        // 設置 Gitlab Webhook Trigger
+        gitlab(
+            triggerOnPush: true,
+            triggerOnMergeRequest: false, 
+            triggerOpenMergeRequestOnPush: "never",
+            triggerOnNoteRequest: false,
+            noteRegex: "Jenkins please retry a build",
+            skipWorkInProgressMergeRequest: true,
+            ciSkip: true,
+            setBuildDescription: true,
+            addNoteOnMergeRequest: false,
+            addCiMessage: false,
+            addVoteOnMergeRequest: false,
+            acceptMergeRequestOnSuccess: false,
+            // 設置哪一些 Branch 的異動時，可以觸發此Pipeline
+            branchFilterType: "NameBasedFilter",
+            includeBranchesSpec: "master",
+            excludeBranchesSpec: "",
+            // pendingBuildName: "build",
+            cancelPendingBuildsOnUpdate: false,
+            // 因為 Secret Token 是在 Jenkinsfile 中管理 , 所以需要注意該專案的Viewer權限(Private repo)只能給特定團隊成員 , 否則任何人有 secret token 就可以觸發該任務
+            // 另外也能從 Jenkins Job 修改組態的設定中生成 , 如果是這種方式需要特別設置該 Job 只能給特定用戶修改組態權限
+            secretToken: "abcdefghijklmnopqrstuvwxyz0123456789ABCDEF"
+        )
+    }
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ["NOTSUPPORT", "sit", "stg", "prod"], description: 'CHOOSE ENVIRONMENT')
+    }
+    environment {
+
+        // ================================================================== Project  ==================================================================
+        
+        GIT_REPO      = "git@gitlab.example.com:it/django-lab.git"                            // define git repo url
+        BRANCH        = "master"                                                                // define git repo branch
+        IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
+        PROJECT_NAME  = "django-lab"                                                          // define project name
+
+        // ============================================================== Docker Image Repository  ==============================================================
+
+        DOCKER_REGISTRY_URL         = "registry-1.docker.io"                                // Docker Hub URL
+        DOCKER_REGISTRY_CREDENTIALS = credentials("docker-hub")                             // Docker Hub Credentials
+        DOCKER_REGISTRY_REPOSITORY  = "$DOCKER_REGISTRY_CREDENTIALS_USR/$PROJECT_NAME"      // Docker Hub 倉庫地址
+
+        // ================================================================= Kubernetes  =================================================================
+
+        KUBERNETES_NAMESPACE = "$params.ENVIRONMENT"                                        // Kubernetes Namespace
+
+        HELM_CHART_NAME      = "$PROJECT_NAME-chart"                                        // Helm Chart Name
+        HELM_RELEASE_NAME    = "$PROJECT_NAME"                                              // Helm Release Name
+
+        SOPS_PGP_FP          = "73F88B4A3B8DFFE2D1EFB704D566664AE2AC5616"                   // Helm-secret Plugin
+
+        // ================================================================================================================================================
+    }
+    stages {
+        // setup environment
+        stage('Setup Environment') {
+            steps {
+                script {
+                    switch (params.ENVIRONMENT) {
+                        case ["sit"]:
+                            env.KUBECONFIG = "sit_jenkins_kubeconfig"
+                            break
+                        case ["stg"]:
+                            env.KUBECONFIG = "stg_jenkins_kubeconfig"
+                            break
+                        case ["prod"]:
+                            env.KUBECONFIG = "prod_jenkins_kubeconfig"
+                            break
+                        case ["NOTSUPPORT"]:
+                            error('ENVIRONMENT not supported')
+                            break
+                    }
+                }
+            }
+        } // end of setup environment
+        
+        // show environment
+        stage("Show Jenkins Environment") {
+            steps {
+                // 更新 Gitlab Pipeline 中的建置狀態
+                updateGitlabCommitStatus name: 'build', state: 'pending'
+
+                script {
+                // Groovy 語法印出目前使用的變數 , 用echo會有點難看 , 所以才採用此種方式
+                String output = """
+                    ==================== Jenkinsfile Environment ====================
+                    IMAGE_TAG                   : ${env.IMAGE_TAG                  ?: 'undefined'}
+                    DOCKER_REGISTRY_URL         : ${env.DOCKER_REGISTRY_URL        ?: 'undefined'}
+                    DOCKER_REGISTRY_REPOSITORY  : ${env.DOCKER_REGISTRY_REPOSITORY ?: 'undefined'}
+                    KUBERNETES_NAMESPACE        : ${env.KUBERNETES_NAMESPACE       ?: 'undefined'}
+                    HELM_CHART_NAME             : ${env.HELM_CHART_NAME            ?: 'undefined'}
+                    HELM_RELEASE_NAME           : ${env.HELM_RELEASE_NAME          ?: 'undefined'}
+                    SOPS_PGP_FP                 : ${env.SOPS_PGP_FP                ?: 'undefined'}
+                    ================================================================== 
+                """.stripIndent()
+                // 輸出內容
+                echo output
+                }
+            }
+        } // end of show environment
+        
+        // build image
+        stage("Build Image") {
+            steps {
+                // 建立Docker Image(設定 --no-cache 不使用 image cache)
+                sh "make build DOCKER_REGISTRY_USERNAME=${env.DOCKER_REGISTRY_CREDENTIALS_USR} IMAGE_TAG=$IMAGE_TAG"
+            }
+        } // end of build image
+        
+        // push image 
+        stage("Docker login and push image") {
+            steps {
+                // 登入Docker Registry
+                sh "make push DOCKER_REGISTRY_USERNAME=$DOCKER_REGISTRY_CREDENTIALS_USR DOCKER_REGISTRY_URL=${env.DOCKER_REGISTRY_URL} DOCKER_REGISTRY_PASSWORD=${env.DOCKER_REGISTRY_CREDENTIALS_PSW} IMAGE_TAG=$IMAGE_TAG"
+            }
+        } // end of push image
+
+        // deploy 
+        stage("Deploy to kubernetes") {
+            steps {
+                script {
+                    // 使用Helm部署至Kubernetes 
+                    withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
+                        switch (params.ENVIRONMENT) {
+                            case ["sit"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=sit --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
+                                break
+                            case ["stg"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=stg --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+                                break
+                            case ["prod"]:
+                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=prod --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+                                break
+                        }
+                    }   
+                }
+            }
+        } // end of deploy
+    }
+    post {
+        failure {
+            // update Gitlab Pipeline status
+            updateGitlabCommitStatus name: 'build', state: 'failed'
+        }
+        success {
+            // update Gitlab Pipeline status
+            updateGitlabCommitStatus name: 'build', state: 'success'
+        }
+        always {
+            // logout docker registry
+            sh "docker logout $DOCKER_REGISTRY_URL"
+        }
+        cleanup {
+            cleanWs()
+        }
+    }
+}
+```
+
+說明: 
+
+<br>
+<br>
 
 
 
