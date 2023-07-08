@@ -8,7 +8,7 @@
 - [Dockerizing Application](#dockerizing-application)
   - [Developer environment setup](#developer-environment-setup)
   - [Generate django project](#generate-django-project)
-  - [Replace the Django application's configuration file with system environment variables.](#replace-the-django-applications-configuration-file-with-system-environment-variables)
+  - [Replace the application's configuration file with system environment variables.](#replace-the-applications-configuration-file-with-system-environment-variables)
 - [Installation](#installation)
   - [PostgreSQL (For Ubuntu 20.04)](#postgresql-for-ubuntu-2004)
     - [Install](#install)
@@ -113,7 +113,7 @@ django-admin startproject app
 <br>
 <br>
 
-## Replace the Django application's configuration file with system environment variables.
+## Replace the application's configuration file with system environment variables.
 
 在Kubernetes中 , 我們能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內的系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過此種方式取得實際配置項目值 , 達到配置內容與程式碼分離 , 相較於直接將 DB連線資訊或 SECRET_KEY 等等機敏資訊寫死在 settings.py 並儲存在 Code 裏面 , 個人覺得還是透過這種分離的方式較為安全 , 但較為麻煩且不易管理(需要另外管理secret or config)，而下面會提到使用 helm-secret 將機敏資訊儲存至版本控制倉庫的方式 , 能夠同時兼顧安全以及管理。
 <br>
@@ -172,9 +172,11 @@ logging.config.dictConfig({
 
 ```
 <br>
+<br>
 
 
 # Installation
+<br>
 <br>
 
 ## PostgreSQL (For Ubuntu 20.04)
