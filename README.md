@@ -183,7 +183,6 @@ logging.config.dictConfig({
 <br>
 
 ### Install 
-<br>
 
 PostgreSQL 安裝
 
@@ -198,7 +197,6 @@ sudo systemctl enable postgresql.service --now
 ### Settings
 
 修改 PostgreSQL 配置 (hba、listen address)
-<br>
 
 ```shell
 # 修改主配置檔
@@ -221,7 +219,6 @@ sudo systemctl restart postgresql.service
 
 ### Create Database User
 
-<br>
 建立給專案使用的 db account
 
 ```shell
@@ -241,6 +238,8 @@ postgres=# CREATE USER django_lab WITH PASSWORD 'django_lab';
 CREATE ROLE
 
 ```
+<br>
+
 
 ### Grant Database Access
 
@@ -264,9 +263,9 @@ CREATE DATABASE
 -- 授權指定使用者對指定Database擁有所有使用權 , 將 database_name 以及 username 替換成實際DB名稱以及用戶
 postgres=# GRANT ALL PRIVILEGES ON DATABASE django_lab TO django_lab;
 GRANT
-
-
 ```
+
+<br>
 
 
 ## Helm 3
