@@ -305,8 +305,6 @@ $ helm version
 
 ##### install
 
-在使用 helm-secrets 插件之前，首先確保該插件被安裝到了本地 HELM 中，安裝 HELM 插件非常簡單，使用下面命令直接進行安裝即可：
-
 ```shell
 # 安裝 helm-secrets
 $ helm plugin install https://github.com/futuresimple/helm-secrets
@@ -319,8 +317,11 @@ NAME       VERSION    DESCRIPTION
 secrets    2.0.2      This plugin provides secrets values encryption for Helm charts secure storing
 ```
 
+說明: 在使用 helm-secrets 插件之前，首先確保該插件被安裝到了本地 HELM 中，安裝 HELM 插件非常簡單，使用上面命令直接進行安裝即可
 
-helm-secrets 插件是通過調用 `SOPS 命令`來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
+<br>
+<br>
+
 
 ```bash
 # Ubuntu，Debian 用户
@@ -333,12 +334,13 @@ $ sudo yum install gnupg
 $ brew install gnupg
 ```
 
+說明: helm-secrets 插件是通過調用 `SOPS 命令`來對我們的 Values 文件進行加密和解密的，而 SOPS 本身又支持多種加密方式，如 AWS 雲的 KMS，Google 雲的 MKS，微軟 Azure 雲的 Key Vault，以及 PGP 等加密方式。此處我們使用 `PGP` 加密方式 , 需要先安裝 `gnupg`
+
+<br>
+<br>
+
 
 ##### Generate keypairs
-
-GPG 同樣也使用了公鑰和私鑰的概念實現了非對稱加密算法。簡單來說：公鑰用於加密，擁有公鑰的人可以且僅僅可以進行加密操作，它可以分發給任何組織或個人；而私鑰則用於解密，且僅能用於解密那些由該私鑰與之配對的公鑰加密的信息，任何擁有私鑰的人都可以進行解密操作，因此，確保私鑰不被洩漏對安全性起著至關重要的作用。
-
-**在使用 gpg 命令進行加密解密之前，首先需要生成 GPG 公鑰和私鑰**。
 
 ```shell
 $ gpg --batch --generate-key << EOF
@@ -358,13 +360,21 @@ Expire-Date: 0
 EOF
 
 ```
-該命令將會為我們生成一對長度為 4096 且永不過期的 `RSA 密鑰對`，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
+
+說明: 
+GPG 同樣也使用了公鑰和私鑰的概念實現了非對稱加密算法。簡單來說：公鑰用於加密，擁有公鑰的人可以且僅僅可以進行加密操作，它可以分發給任何組織或個人；而私鑰則用於解密，且僅能用於解密那些由該私鑰與之配對的公鑰加密的信息，任何擁有私鑰的人都可以進行解密操作，因此，確保私鑰不被洩漏對安全性起著至關重要的作用。
+
+**在使用 gpg 命令進行加密解密之前，首先需要生成 GPG 公鑰和私鑰**。
+
+上述命令將會為我們生成一對長度為 4096 且永不過期的 `RSA 密鑰對`，gpg 命令支持使用更多的參數來控制生成密鑰對，如為生成的密鑰對設定使用密碼等等，更多關於 GPG 命令的使用參數，請參考官方文檔。
+
+<br>
+<br>
+
 
 
 ##### setup environment variable for SOPS
 
-當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
-在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。
 
 ```shell
 $ gpg --list-key
@@ -375,14 +385,22 @@ uid           [ultimate] HELM Secret (Used for HELM Secret Plugin) <helm-secret@
 sub   rsa4096 2020-04-24 [SEA]
 ```
 
-上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID , 
+說明: 當生成 GPG 密鑰對以後，我們就可通過 gpg 的 `--list-keys` 和 `--list-secret-keys` 命令分別列出當前系統中的公鑰和私鑰信息
+在生成了密鑰對之後，就可以利用它們來為我們的文件進行加密和解密操作。而上述中的 `13D525EEF0A5FA38F4E78F7900E0160999E3C663` 則是我們的密鑰對的ID , 在進行加解密時會使用到這個ID。
 
+<br>
+<br>
 
-如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數 , 讓 helm-secrets 知道使用哪一組密鑰對進行加密解密。
 
 ```shell
 $ export SOPS_PGP_FP=13D525EEF0A5FA38F4E78F7900E0160999E3C663
 ```
+
+說明: 如果我們沒有在命令行通過 `--pgp`, `-p` 參數為 SOPS 指定密鑰信息 , 那麼它則會嘗試從 `SOPS_PGP_FP` 系統環境變量中獲取該信息 , 因此我們可以將密鑰對 ID 指定給該環境變數 , 讓 helm-secrets 知道使用哪一組密鑰對進行加密解密。
+
+<br>
+<br>
+
 
 
 
