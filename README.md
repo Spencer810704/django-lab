@@ -184,7 +184,6 @@ logging.config.dictConfig({
 
 ### Install 
 
-PostgreSQL 安裝
 
 ```shell
 sudo apt update
@@ -192,11 +191,12 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl enable postgresql.service --now
 ```
 
+PostgreSQL 安裝步驟 (for Ubuntu)
+
 <br>
 
 ### Settings
 
-修改 PostgreSQL 配置 (hba、listen address)
 
 ```shell
 # 修改主配置檔
@@ -214,6 +214,8 @@ host    all             all             0.0.0.0/0               md5
 # 重啟套用配置
 sudo systemctl restart postgresql.service
 ```
+
+修改 PostgreSQL 配置 (hba、listen address)
 
 <br>
 
