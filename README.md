@@ -92,10 +92,13 @@ source venv/bin/activate
 pip install django
 django-admin startproject app
 ```
+<br>
 
 ## Replace the Django application's configuration file with system environment variables.
 
 在Kubernetes中 , 我們能夠將 `secret` 或者是 `configmap` 等方式注入到 Pod 內的系統環境變數中 , 而 Django 也可以透過 `os.getenv()` 方法取得系統環境變數 , 透過此種方式取得實際配置項目值 , 達到配置內容與程式碼分離 , 相較於直接將 DB連線資訊或 SECRET_KEY 等等機敏資訊寫死在 settings.py 並儲存在 Code 裏面 , 個人覺得還是透過這種分離的方式較為安全 , 但較為麻煩且不易管理(需要另外管理secret or config)，而下面會提到使用 helm-secret 將機敏資訊儲存至版本控制倉庫的方式 , 能夠同時兼顧安全以及管理。
+<br>
+<br>
 
 ```python
 # 引用以下這些Library
@@ -149,13 +152,17 @@ logging.config.dictConfig({
 })
 
 ```
+<br>
 
 
 # Installation
+<br>
 
 ## PostgreSQL (For Ubuntu 20.04)
+<br>
 
 ### Install 
+<br>
 
 PostgreSQL 安裝
 
@@ -165,9 +172,12 @@ sudo apt install postgresql postgresql-contrib
 sudo systemctl enable postgresql.service --now
 ```
 
+<br>
+
 ### Settings
 
 修改 PostgreSQL 配置 (hba、listen address)
+<br>
 
 ```shell
 # 修改主配置檔
@@ -186,8 +196,11 @@ host    all             all             0.0.0.0/0               md5
 sudo systemctl restart postgresql.service
 ```
 
+<br>
+
 ### Create Database User
 
+<br>
 建立給專案使用的 db account
 
 ```shell
