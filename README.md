@@ -871,6 +871,7 @@ pipeline {
   - 最後執行完畢時會刪除相關 Workspace 確保每一次執行的 jenkins job workspace 中的內容都是最新的。
 
 
+
 <br>
 <br>
 
