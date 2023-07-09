@@ -863,7 +863,7 @@ pipeline {
   - `Show Jenkins Environment`: 顯示目前編譯使用到的相關環境變數。
   - `Build Image`:  build image 透過 makefile 內定義要執行相關的指令。
   - `Docker login and push image`: 同上。
-  - `Deploy to kubernetes`: 透過 HELM 部署我們的 application (此處尚未整合至 makefile 中 , 後續會再整合到 makefile 內)
+  - `Deploy to kubernetes`: 透過 HELM 部署我們的 application , 也是透過 makefile 管理
 - Pipeline post stage
   - 當 `build 失敗` , 則將 failed 狀態回寫回 gitlab 。
   - 當 `build 成功` , 則將 success 狀態回寫回 gitlab 。
