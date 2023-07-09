@@ -15,7 +15,3 @@ build:
 push:
 	echo $(DOCKER_REGISTRY_PASSWORD) | docker login $(DOCKER_REGISTRY_URL) -u $(DOCKER_REGISTRY_CREDENTIALS_USR) --password-stdin
 	docker push $(TARGET_IMAGE_NAME) 
-
-# 部署至 Kubernetes
-deploy:
-	kubectl --kubeconfig=$(KUBECONFIG) apply -f deployment.yaml --image $(TARGET_IMAGE_NAME)
