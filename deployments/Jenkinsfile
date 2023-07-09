@@ -133,13 +133,16 @@ pipeline {
                     withCredentials([file(credentialsId: "${env.KUBECONFIG}", variable: "KUBECONFIG")]) {
                         switch (params.ENVIRONMENT) {
                             case ["sit"]:
-                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=sit --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
+                                sh "make deploy-sit KUBECONFIG=$KUBECONFIG HELM_RELEASE_NAME=$HELM_RELEASE_NAME HELM_CHART_NAME=$HELM_CHART_NAME KUBERNETES_NAMESPACE=$KUBERNETES_NAMESPACE DOCKER_REGISTRY_REPOSITORY=$DOCKER_REGISTRY_REPOSITORY IMAGE_TAG=$IMAGE_TAG"
+                                // sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=sit --set image.tag=$IMAGE_TAG --values django-lab-chart/values-sit.yaml --values django-lab-chart/secrets.sit.yaml"        
                                 break
                             case ["stg"]:
-                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=stg --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
+                                sh "make deploy-stg KUBECONFIG=$KUBECONFIG HELM_RELEASE_NAME=$HELM_RELEASE_NAME HELM_CHART_NAME=$HELM_CHART_NAME KUBERNETES_NAMESPACE=$KUBERNETES_NAMESPACE DOCKER_REGISTRY_REPOSITORY=$DOCKER_REGISTRY_REPOSITORY IMAGE_TAG=$IMAGE_TAG"
+                                // sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=stg --set image.tag=$IMAGE_TAG --values django-lab-chart/values-stg.yaml --values django-lab-chart/secrets.stg.yaml"
                                 break
                             case ["prod"]:
-                                sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=prod --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
+                                sh "make deploy-prod KUBECONFIG=$KUBECONFIG HELM_RELEASE_NAME=$HELM_RELEASE_NAME HELM_CHART_NAME=$HELM_CHART_NAME KUBERNETES_NAMESPACE=$KUBERNETES_NAMESPACE DOCKER_REGISTRY_REPOSITORY=$DOCKER_REGISTRY_REPOSITORY IMAGE_TAG=$IMAGE_TAG"
+                                // sh "helm secrets upgrade --kubeconfig $KUBECONFIG --install $HELM_RELEASE_NAME $HELM_CHART_NAME --namespace $KUBERNETES_NAMESPACE --set image.repository=$DOCKER_REGISTRY_REPOSITORY --set environment=prod --set image.tag=$IMAGE_TAG --values django-lab-chart/values-prod.yaml --values django-lab-chart/secrets.prod.yaml"
                                 break
                         }
                     }   
