@@ -35,8 +35,8 @@
     - [Developer environment setup](#developer-environment-setup)
     - [Generate django project](#generate-django-project)
     - [Replace the application's configuration file with system environment variables.](#replace-the-applications-configuration-file-with-system-environment-variables)
-  - [Makefile](#makefile)
   - [Jenkinsfile (Piepline)](#jenkinsfile-piepline)
+  - [Makefile](#makefile)
 - [Reference](#reference)
 
 
@@ -678,33 +678,6 @@ logging.config.dictConfig({
 <br>
 
 
-## Makefile
-
-```makefile
-# Dockerfile 檔案名稱
-DOCKERFILE=Dockerfile
-
-# 根據專案名稱做修改
-IMAGE_NAME=django-lab
-
-# 目標Imag名稱 (格式：docker_registry_url/account_name/your_image_name:your_image_tag)
-TARGET_IMAGE_NAME=$(DOCKER_REGISTRY_URL)/$(DOCKER_REGISTRY_USERNAME)/$(IMAGE_NAME):$(IMAGE_TAG)
-
-# Build image (直接在Build的時候打Tag)
-build:
-	docker build -t $(TARGET_IMAGE_NAME) -f $(DOCKERFILE) .
-
-# 登入 & Push Image
-push:
-	echo $(DOCKER_REGISTRY_PASSWORD) | docker login $(DOCKER_REGISTRY_URL) -u $(DOCKER_REGISTRY_CREDENTIALS_USR) --password-stdin
-	docker push $(TARGET_IMAGE_NAME) 
-
-```
-說明: 
-- target:
-  - build: build image 
-  - push: 將 jenkins credential 獲取儲存的 DOCKER HUB 密碼 , 透過管道命令傳遞密碼給 docker login 進行登入 , 並進行推送 IMAGE 動作。
-
 
 <br>
 <br>
@@ -754,7 +727,7 @@ pipeline {
         // ================================================================== Project  ==================================================================
         
         GIT_REPO      = "git@gitlab.example.com:it/django-lab.git"                            // define git repo url
-        BRANCH        = "master"                                                                // define git repo branch
+        BRANCH        = "master"                                                              // define git repo branch
         IMAGE_TAG     = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()   // 取得 Git Commit Hash 前六碼 作為 Image Tag
         PROJECT_NAME  = "django-lab"                                                          // define project name
 
@@ -882,11 +855,53 @@ pipeline {
 ```
 
 說明: 
+- gitLabConnection('gitlab') 用於回寫 gitlab 專案目前的 build 狀態為成功或失敗。
+- 當需要自動觸發 jenkins job 時候則設置 Gitlab Webhook Trigger。
+- environment 中設定相關的 docker hub / 要進行操作的環境 / 專案名稱 / SOPS KEY PAIRS 的 ID / 以提供後續的 STAGE 中使用。
+- Pipeline stage
+  - Setup Environment: 設定要使用的環境變數提供給下面 STAGE 使用 , 例如: SIT 環境的 kubeconfig , 我們在 jenkins credential 內定義的名稱為 sit_jenkins_kubeconfig , 則下面的 STAGE 就能直接套用。
+  - Show Jenkins Environment: 顯示目前編譯使用到的相關環境變數。
+  - Build Image:  build image 透過 makefile 內定義要執行相關的指令。
+  - Docker login and push image: 同上。
+  - Deploy to kubernetes: 透過 HELM 部署我們的 application (此處尚未整合至 makefile 中 , 後續會再整合到 makefile 內)
+- Pipeline post stage
+  - 當 build 失敗 , 則將 failed 狀態回寫回 gitlab 。
+  - 當 build 成功 , 則將 success 狀態回寫回 gitlab 。
+  - 每次執行不管成功與否 , 都會將 docker logout , 因為 docker login 會將相關資訊記錄在 $HOME/.docker/config.json 中 , 不是先在機器上先登入並記錄 docker credential 的原因為 , 假設我有多個 jenkins agent , 我都需要在機器上先進行登入 , 不便於管理 , 而是透過 jenkins 幫我們進行這個操作 , 在未來擴充 jenkins agent 也不需要手動上機器進行相關操作。
+  - 最後執行完畢時會刪除相關 Workspace 確保每一次執行的 jenkins job workspace 中的內容都是最新的。
+
 
 <br>
 <br>
 
 
+## Makefile
+
+```makefile
+# Dockerfile 檔案名稱
+DOCKERFILE=Dockerfile
+
+# 根據專案名稱做修改
+IMAGE_NAME=django-lab
+
+# 目標Imag名稱 (格式：docker_registry_url/account_name/your_image_name:your_image_tag)
+TARGET_IMAGE_NAME=$(DOCKER_REGISTRY_URL)/$(DOCKER_REGISTRY_USERNAME)/$(IMAGE_NAME):$(IMAGE_TAG)
+
+# Build image (直接在Build的時候打Tag)
+build:
+	docker build -t $(TARGET_IMAGE_NAME) -f $(DOCKERFILE) .
+
+# 登入 & Push Image
+push:
+	echo $(DOCKER_REGISTRY_PASSWORD) | docker login $(DOCKER_REGISTRY_URL) -u $(DOCKER_REGISTRY_CREDENTIALS_USR) --password-stdin
+	docker push $(TARGET_IMAGE_NAME) 
+
+```
+
+說明: 
+- target:
+  - `build`: build image。
+  - `push`: 將 jenkins credential 獲取事先儲存的 docker hub 密碼 , 透過管道命令傳遞密碼給 docker login 進行登入 , 並接著進行推送 image 動作。
 
 
 # Reference
