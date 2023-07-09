@@ -699,11 +699,12 @@ push:
 	echo $(DOCKER_REGISTRY_PASSWORD) | docker login $(DOCKER_REGISTRY_URL) -u $(DOCKER_REGISTRY_CREDENTIALS_USR) --password-stdin
 	docker push $(TARGET_IMAGE_NAME) 
 
-# 部署至 Kubernetes
-deploy:
-	kubectl --kubeconfig=$(KUBECONFIG) apply -f deployment.yaml --image $(TARGET_IMAGE_NAME)
 ```
 說明: 
+- target:
+  - build: build image 
+  - push: 將 jenkins credential 獲取儲存的 DOCKER HUB 密碼 , 透過管道命令傳遞密碼給 docker login 進行登入 , 並進行推送 IMAGE 動作。
+
 
 <br>
 <br>
@@ -890,4 +891,5 @@ pipeline {
 
 # Reference
 
-https://segmentfault.com/a/1190000040199249
+- https://segmentfault.com/a/1190000040199249
+- https://blog.goodjack.tw/2023/01/use-makefile-to-manage-workflows-for-web-projects.html#%E4%BB%80%E9%BA%BC%E6%98%AF-makemakefile
